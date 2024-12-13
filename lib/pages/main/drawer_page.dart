@@ -1,6 +1,7 @@
 import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/pages/auth/change_password_page.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
+import 'package:chat_app/pages/profile/profile_page.dart';
 import 'package:chat_app/themes/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,8 @@ class _DrawerPageState extends State<DrawerPage> {
           const SizedBox(height: 18.0),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () {},
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const ProfilePage())),
             child: const Row(
               children: [
                 Icon(Icons.person, size: iconSize, color: iconColor),

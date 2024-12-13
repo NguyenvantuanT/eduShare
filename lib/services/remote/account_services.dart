@@ -20,11 +20,11 @@ class AccountServices implements ImplAccountServices {
   }
 
   @override
-  Future<void> updateUser(UserModel user) async {
+  Future<void> updateUser(UserModel body) async {
     UserModel user = SharedPrefs.user ?? UserModel();
     CollectionReference userCollection =
         FirebaseFirestore.instance.collection('users');
-    await userCollection.doc(user.email).update(user.toJson());
+    await userCollection.doc(user.email).update(body.toJson());
   }
 
 }
