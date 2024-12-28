@@ -5,7 +5,7 @@ import 'package:chat_app/pages/auth/login_page.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
 import 'package:chat_app/services/remote/body/change_password_body.dart';
-import 'package:chat_app/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 

@@ -7,16 +7,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class ImplAuthServices {
-  Future<void> login(LoginBody body);
-  Future<void> resigter(ResigterBody body);
-  Future<void> forgotPassword(ForgotPasswordBody body);
+  Future<dynamic> login(LoginBody body);
+  Future<dynamic> resigter(ResigterBody body);
+  Future<dynamic> forgotPassword(ForgotPasswordBody body);
   Future<bool> changePassword(ChangePasswordBody body);
 }
 
 class AuthServices implements ImplAuthServices {
   @override
-  Future<void> login(LoginBody body) async {
-      print(body);
+  Future<dynamic> login(LoginBody body) async {
     await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: body.email ?? '',
       password: body.password ?? '',
@@ -24,7 +23,7 @@ class AuthServices implements ImplAuthServices {
   }
 
   @override
-  Future<void> resigter(ResigterBody body) async {
+  Future<dynamic> resigter(ResigterBody body) async {
     CollectionReference userCollection =
         FirebaseFirestore.instance.collection('users');
     await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -57,7 +56,7 @@ class AuthServices implements ImplAuthServices {
   }
 
   @override
-  Future<void> forgotPassword(ForgotPasswordBody body) async {
+  Future<dynamic> forgotPassword(ForgotPasswordBody body) async {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: body.email ?? '');
   }
 }

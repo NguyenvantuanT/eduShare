@@ -4,12 +4,11 @@ import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
 import 'package:chat_app/pages/auth/forgot_password_page.dart';
 import 'package:chat_app/pages/auth/sign_up_page.dart';
-import 'package:chat_app/pages/main/home_page.dart';
 import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/services/remote/account_services.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
 import 'package:chat_app/services/remote/body/login_body.dart';
-import 'package:chat_app/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 
@@ -46,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!context.mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (_) => const HomePage(),
+            builder: (_) => const MainPage(),
           ),
           (route) => false,
         );
@@ -54,15 +53,6 @@ class _LoginPageState extends State<LoginPage> {
     }).catchError((onError) {
       if (!context.mounted) return;
       DelightToastShow.showToast(context: context, text: "Lofgin fail");
-      accountServices.getUser(body.email ?? '').then((_) {
-        if (!context.mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => const MainPage(),
-          ),
-          (route) => false,
-        );
-      }).catchError((onError) {});
     }).whenComplete(() => setState(() => isLoading = true));
   }
 

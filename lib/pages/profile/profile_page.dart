@@ -10,7 +10,7 @@ import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/account_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
-import 'package:chat_app/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

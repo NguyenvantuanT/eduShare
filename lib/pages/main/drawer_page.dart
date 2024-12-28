@@ -2,7 +2,7 @@ import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/pages/auth/change_password_page.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
-import 'package:chat_app/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../services/local/shared_prefs.dart';

@@ -1,6 +1,6 @@
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/messager_model.dart';
-import 'package:chat_app/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
