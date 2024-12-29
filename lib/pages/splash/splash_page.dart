@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:chat_app/pages/auth/login_page.dart';
 import 'package:chat_app/pages/main_page.dart';
+import 'package:chat_app/pages/onBoarding/on_boarding_page.dart';
+import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -23,15 +25,19 @@ class _SplashPageState extends State<SplashPage> {
 
   void _checkStatus() {
     Timer(const Duration(milliseconds: 2600), () {
-      if (SharedPrefs.isLogin) {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
-            (Route<dynamic> route) => false);
+      if (SharedPrefs.isAccessed) {
+        if (SharedPrefs.isLogin) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const MainPage()),
+              (Route<dynamic> route) => false);
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (Route<dynamic> route) => false);
+        }
       } else {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const OnBoardingPage()),
             (Route<dynamic> route) => false);
       }
     });
@@ -41,19 +47,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      body: Center(
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey,
-          highlightColor: Colors.grey.shade400,
-          child: const Text(
-            "V T",
-            style: TextStyle(
-                color: AppColor.grey,
-                fontSize: 45.0,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+      body: Center(child: SvgPicture.asset(AppImages.imageLogo)),
     );
   }
 }

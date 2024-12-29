@@ -6,6 +6,7 @@ import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
+import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
 import 'package:chat_app/services/remote/body/resigter_body.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
@@ -14,14 +15,14 @@ import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _RegisterPageState extends State<RegisterPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -81,78 +82,63 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColor.bgColor,
-      body: _buildUI(context),
-    );
-  }
-
-  Widget _buildUI(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Center(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20.0).copyWith(bottom: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0).copyWith(
+            top: MediaQuery.of(context).padding.top + 50.0,
+            bottom: 30.0,
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              _headerAvata(),
-              _headerTitle(),
-              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: getImageFromGallery,
+                child: CircleAvatar(
+                  radius: MediaQuery.of(context).size.width * 0.15,
+                  backgroundImage: fileAvatar != null
+                      ? FileImage(fileAvatar ?? File(''))
+                      : const AssetImage("assets/images/default_ava.jpg")
+                          as ImageProvider,
+                ),
+              ),
+              Text(
+                "Register",
+                style: AppStyles.STYLE_28_BOLD.copyWith(
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: 20.0),
               _formSignUp(),
-              const SizedBox(height: 10),
-              _forgotPassword(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40.0),
               AppElevatedButton(
                 text: "Register",
                 isDisable: isLoading,
                 onPressed: () => onSubmit(context),
               ),
-              const SizedBox(height: 10),
-              _linkLogin(),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Have an account? ",
+                      style: AppStyles.STYLE_12
+                          .copyWith(color: AppColor.textColor)),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    ),
+                    behavior: HitTestBehavior.translucent,
+                    child: Text('Login',
+                        style: AppStyles.STYLE_14_BOLD
+                            .copyWith(color: AppColor.blue)),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _linkLogin() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text("Alredy have accout"),
-        GestureDetector(
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const LoginPage())),
-          behavior: HitTestBehavior.translucent,
-          child: const Padding(
-            padding: EdgeInsets.all(4.0),
-            child: Text(
-              "Login?",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _forgotPassword() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        GestureDetector(
-          onTap: () {},
-          behavior: HitTestBehavior.translucent,
-          child: const Padding(
-            padding: EdgeInsets.all(4.0),
-            child: Text(
-              "Forgot Password ?",
-              style: TextStyle(fontSize: 15),
-            ),
-          ),
-        )
-      ],
     );
   }
 
@@ -163,21 +149,21 @@ class _SignUpPageState extends State<SignUpPage> {
         children: [
           AppTextField(
             controller: usernameController,
-            hintText: "Username",
+            labelText: "Username",
             textInputAction: TextInputAction.next,
             validator: Validator.required,
           ),
           const SizedBox(height: 20),
           AppTextField(
             controller: emailController,
-            hintText: "Email",
+            labelText: "Email",
             textInputAction: TextInputAction.next,
             validator: Validator.email,
           ),
           const SizedBox(height: 20),
           AppTextFieldPassword(
             controller: passwordController,
-            hintText: "Pass",
+            labelText: "Password",
             textInputAction: TextInputAction.next,
             validator: Validator.password,
           ),
@@ -185,7 +171,7 @@ class _SignUpPageState extends State<SignUpPage> {
           AppTextFieldPassword(
             onChanged: (_) => setState(() {}),
             controller: confirmPassController,
-            hintText: "Confirm password",
+            labelText: "Confirm password",
             textInputAction: TextInputAction.done,
             validator:
                 Validator.confirmPassword(passwordController.text.trim()),
@@ -194,28 +180,4 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
-  Widget _headerTitle() {
-    return const Text(
-      "S I G N U P",
-      style: TextStyle(fontSize: 22),
-    );
-  }
-
-  Widget _headerAvata() {
-    return GestureDetector(
-      onTap: getImageFromGallery,
-      child: CircleAvatar(
-        radius: MediaQuery.of(context).size.width * 0.15,
-        backgroundImage: fileAvatar != null
-            ? FileImage(fileAvatar ?? File(''))
-            : const AssetImage("assets/images/default_ava.jpg")
-                as ImageProvider,
-      ),
-    );
-  }
-
-  //nguyenvantuan487t@gmail.com pass 1234567
-  //vtinter@gmail.com pass 1234567
-  //cun@gmail.com pass 1234567
 }

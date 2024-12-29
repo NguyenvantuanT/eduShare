@@ -1,4 +1,5 @@
 import 'package:chat_app/resource/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class AppElevatedButton extends StatelessWidget {
@@ -6,10 +7,10 @@ class AppElevatedButton extends StatelessWidget {
     super.key,
     this.onPressed,
     this.height = 48.0,
-    this.color = AppColor.white,
-    this.borderColor = AppColor.white,
+    this.color = AppColor.blue,
+    this.borderColor = AppColor.blue,
     required this.text,
-    this.textColor = AppColor.black,
+    this.textColor = AppColor.white,
     this.fontSize = 16.0,
     this.icon,
     BorderRadius? borderRadius,
@@ -18,8 +19,8 @@ class AppElevatedButton extends StatelessWidget {
     Color? splashColor,
     Color? highlightColor,
   })  : borderRadius = borderRadius ?? BorderRadius.circular(10.0),
-        splashColor = splashColor ?? AppColor.yellow.withOpacity(0.8),
-        highlightColor = highlightColor ?? AppColor.red.withOpacity(0.8);
+        splashColor = splashColor ?? AppColor.grey.withOpacity(0.2),
+        highlightColor = highlightColor ?? AppColor.red.withOpacity(0.6);
 
   AppElevatedButton.outline({
     super.key,
@@ -37,46 +38,11 @@ class AppElevatedButton extends StatelessWidget {
     Color? splashColor,
     Color? highlightColor,
   })  : borderRadius = borderRadius ?? BorderRadius.circular(10.0),
-        splashColor = splashColor ?? AppColor.yellow.withOpacity(0.6),
+        splashColor = splashColor ?? AppColor.blue.withOpacity(0.6),
         highlightColor = highlightColor ?? AppColor.green.withOpacity(0.6);
 
-  AppElevatedButton.small({
-    super.key,
-    this.onPressed,
-    this.height = 38.0,
-    this.color = AppColor.white,
-    this.borderColor = AppColor.white,
-    required this.text,
-    this.textColor = AppColor.black,
-    this.fontSize = 14.6,
-    this.icon,
-    BorderRadius? borderRadius,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
-    this.isDisable = false,
-    Color? splashColor,
-    Color? highlightColor,
-  })  : borderRadius = borderRadius ?? BorderRadius.circular(8.0),
-        splashColor = splashColor ?? AppColor.yellow.withOpacity(0.8),
-        highlightColor = highlightColor ?? AppColor.green.withOpacity(0.8);
-
-  AppElevatedButton.smallOutline({
-    super.key,
-    this.onPressed,
-    this.height = 38.0,
-    this.color = AppColor.white,
-    this.borderColor = AppColor.blue,
-    required this.text,
-    this.textColor = AppColor.black,
-    this.fontSize = 14.6,
-    this.icon,
-    BorderRadius? borderRadius,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
-    this.isDisable = false,
-    Color? splashColor,
-    Color? highlightColor,
-  })  : borderRadius = borderRadius ?? BorderRadius.circular(8.0),
-        splashColor = splashColor ?? AppColor.yellow.withOpacity(0.6),
-        highlightColor = highlightColor ?? AppColor.green.withOpacity(0.6);
+  
+  
 
   final Function()? onPressed;
   final double height;
@@ -100,7 +66,7 @@ class AppElevatedButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: borderRadius,
-        onTap: isDisable ==true ? null : onPressed,
+        onTap: isDisable == true ? null : onPressed,
         splashColor: splashColor,
         highlightColor: highlightColor,
         child: Ink(
@@ -128,10 +94,7 @@ class AppElevatedButton extends StatelessWidget {
                     )
                   : Text(
                       text,
-                      style: TextStyle(
-                          color: textColor,
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600),
+                      style: AppStyles.STYLE_14.copyWith(color: textColor),
                     ),
             ],
           ),

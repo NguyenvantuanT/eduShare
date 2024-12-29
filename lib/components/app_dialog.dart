@@ -34,7 +34,7 @@ class AppDialog {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AppElevatedButton.smallOutline(
+                AppElevatedButton(
                   onPressed: () {
                     action?.call();
                     Navigator.pop(context);
@@ -44,7 +44,7 @@ class AppDialog {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0),
-                  child: AppElevatedButton.smallOutline(
+                  child: AppElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     text: 'No',
@@ -96,24 +96,24 @@ class AppDialog {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  AppElevatedButton.smallOutline(
-                    textColor: isEmpty ? AppColor.grey : AppColor.black,
-                    onPressed: isEmpty
-                        ? null
-                        : () {
-                            Navigator.of(context).pop(true);
-                          },
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    text: 'Yes',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12.0),
-                    child: AppElevatedButton.smallOutline(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      text: 'No',
-                    ),
-                  ),
+                  // AppElevatedButton.smallOutline(
+                  //   textColor: isEmpty ? AppColor.grey : AppColor.black,
+                  //   onPressed: isEmpty
+                  //       ? null
+                  //       : () {
+                  //           Navigator.of(context).pop(true);
+                  //         },
+                  //   padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  //   text: 'Yes',
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 12.0),
+                  //   child: AppElevatedButton.smallOutline(
+                  //     onPressed: () => Navigator.of(context).pop(false),
+                  //     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  //     text: 'No',
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -142,21 +142,21 @@ class AppDialog {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              AppElevatedButton.smallOutline(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                text: 'Yes',
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12.0),
-                child: AppElevatedButton.smallOutline(
-                  onPressed: () => Navigator.pop(context, false),
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  text: 'No',
-                ),
-              ),
+              // AppElevatedButton.smallOutline(
+              //   onPressed: () {
+              //     Navigator.pop(context, true);
+              //   },
+              //   padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              //   text: 'Yes',
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 12.0),
+              //   child: AppElevatedButton.smallOutline(
+              //     onPressed: () => Navigator.pop(context, false),
+              //     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              //     text: 'No',
+              //   ),
+              // ),
             ],
           ),
         ],

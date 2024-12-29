@@ -1,4 +1,5 @@
 import 'package:chat_app/resource/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class AppTextField extends StatelessWidget {
@@ -12,13 +13,14 @@ class AppTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.textInputAction,
     this.validator,
-    this.readOnly = false,
+    this.readOnly = false, this.labelText,
   });
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final TextInputType? keyboardType;
   final String? hintText;
+  final String? labelText;
   final Icon? prefixIcon;
   final Function(String)? onFieldSubmitted;
   final TextInputAction? textInputAction;
@@ -32,46 +34,31 @@ class AppTextField extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
         );
 
-    return Stack(
-      children: [
-        Container(
-          height: 48.6,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColor.shadow,
-                offset: Offset(0.0, 3.0),
-                blurRadius: 6.0,
-              ),
-            ],
-          ),
-        ),
-        TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          keyboardType: keyboardType,
-          onFieldSubmitted: onFieldSubmitted,
-          textInputAction: textInputAction,
-          validator: validator,
-          readOnly: readOnly,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.6),
-            filled: true,
-            fillColor: AppColor.white,
-            border: outlineInputBorder(AppColor.red),
-            focusedBorder: outlineInputBorder(AppColor.grey),
-            enabledBorder: outlineInputBorder(AppColor.grey),
-            hintText: hintText,
-            hintStyle: const TextStyle(color: AppColor.grey),
-            labelText: hintText,
-            prefixIcon: prefixIcon,
-            errorStyle: const TextStyle(color: AppColor.red),
-          ),
-        ),
-      ],
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      cursorColor: AppColor.textColor,
+      keyboardType: keyboardType,
+      onFieldSubmitted: onFieldSubmitted,
+      textInputAction: textInputAction,
+      validator: validator,
+      readOnly: readOnly,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.6),
+        filled: true,
+        fillColor: AppColor.white,
+        border:outlineInputBorder(AppColor.grey),
+        focusedBorder: outlineInputBorder(AppColor.grey),
+        enabledBorder: outlineInputBorder(AppColor.grey),
+        hintText: hintText,
+        hintStyle: AppStyles.STYLE_14.copyWith(color: AppColor.grey),
+        labelText: labelText,
+        labelStyle: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
+        prefixIcon: prefixIcon,
+        errorStyle: const TextStyle(color: AppColor.red),
+      ),
     );
   }
 }
