@@ -1,6 +1,7 @@
-import 'dart:math' as math;
 import 'package:chat_app/components/app_avatar.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
+import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:flutter/material.dart';
 
 class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
@@ -23,39 +24,26 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       color: color,
-      padding: const EdgeInsets.symmetric(horizontal: 12.0).copyWith(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
           top: MediaQuery.of(context).padding.top + 6.0, bottom: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: leftPressed,
-            child: Transform.rotate(
-              angle: 45 * math.pi / 180,
-              child: Container(
-                margin: const EdgeInsets.all(8.6),
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: AppColor.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppColor.shadow,
-                      offset: Offset(3.0, 3.0),
-                      blurRadius: 4.6,
-                    ),
-                  ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Hi, ${SharedPrefs.user?.name}',
+                style: AppStyles.STYLE_18_BOLD.copyWith(
+                  color: AppColor.textColor,
                 ),
-                child: Transform.rotate(
-                    angle: -45 * math.pi / 180,
-                    child: const Icon(Icons.menu,
-                        size: 22.0, color: AppColor.brown)),
               ),
-            ),
-          ),
-          Text(
-            title,
-            style: const TextStyle(color: AppColor.orange, fontSize: 24.6),
+              Text(
+                title,
+                style: AppStyles.STYLE_14.copyWith(color: AppColor.greyText),
+              ),
+            ],
           ),
           GestureDetector(
             onTap: rightPressed,

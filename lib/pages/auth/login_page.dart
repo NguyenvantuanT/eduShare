@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                   .copyWith(top: 50.0, bottom: 40.0),
               decoration: const BoxDecoration(
                 color: AppColor.bgColor,
-                boxShadow: AppShadow.boxShadow,
+                boxShadow: AppShadow.boxShadowLogin,
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(40.0),
                     topRight: Radius.circular(40.0)),

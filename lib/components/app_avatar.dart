@@ -21,7 +21,7 @@ class AppAvatar extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(1.0),
           decoration: const BoxDecoration(
-              color: AppColor.orange, shape: BoxShape.circle),
+              color: AppColor.blue, shape: BoxShape.circle),
           child: ClipRRect(
               borderRadius: BorderRadius.circular(radius),
               child: ClipRRect(
@@ -33,7 +33,7 @@ class AppAvatar extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorWidget: (_, __, ___) => CircleAvatar(
                     radius: radius * 2,
-                    backgroundColor: Colors.orange,
+                    backgroundColor: AppColor.blue,
                     child: const Icon(Icons.error_outline, color: Colors.white),
                   ),
                   placeholder: (_, __) => SizedBox.square(
