@@ -17,6 +17,14 @@ class AppShadow {
     ),
   ];
 
+  static const boxShadowIcon = [
+    BoxShadow(
+      color: AppColor.shadow,
+      blurRadius: 6.0,
+      offset: Offset(0.0, 3.0),
+    ),
+  ];
+
   static const boxShadowContainer = [
     BoxShadow(
       color: AppColor.grey,
