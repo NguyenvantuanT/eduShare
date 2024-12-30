@@ -16,6 +16,10 @@ class AppImages {
   static const iconSearch= '${assetsIcon}ic_search.svg';
   static const iconBriefCase= '${assetsIcon}ic_brief_case.svg';
   static const iconUser= '${assetsIcon}ic_user.svg';
+  static const iconEmail= '${assetsIcon}ic_email.svg';
+  static const iconPassword= '${assetsIcon}ic_password.svg';
+  static const iconProfile= '${assetsIcon}ic_profile.svg';
+  static const iconPrivacy= '${assetsIcon}ic_privacy.svg';
 
 
 

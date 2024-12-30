@@ -13,7 +13,9 @@ class AppTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.textInputAction,
     this.validator,
-    this.readOnly = false, this.labelText,
+    this.readOnly = false,
+    this.labelText,
+    this.onChanged,
   });
 
   final TextEditingController? controller;
@@ -26,6 +28,7 @@ class AppTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final FormFieldValidator<String>? validator;
   final bool readOnly;
+  final Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +40,7 @@ class AppTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       focusNode: focusNode,
+      onChanged: onChanged,
       cursorColor: AppColor.textColor,
       keyboardType: keyboardType,
       onFieldSubmitted: onFieldSubmitted,
@@ -49,7 +53,7 @@ class AppTextField extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.6),
         filled: true,
         fillColor: AppColor.white,
-        border:outlineInputBorder(AppColor.grey),
+        border: outlineInputBorder(AppColor.grey),
         focusedBorder: outlineInputBorder(AppColor.grey),
         enabledBorder: outlineInputBorder(AppColor.grey),
         hintText: hintText,

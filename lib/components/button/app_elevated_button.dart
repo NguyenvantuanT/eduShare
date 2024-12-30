@@ -22,6 +22,25 @@ class AppElevatedButton extends StatelessWidget {
         splashColor = splashColor ?? AppColor.grey.withOpacity(0.2),
         highlightColor = highlightColor ?? AppColor.red.withOpacity(0.6);
 
+  AppElevatedButton.small({
+    super.key,
+    this.onPressed,
+    this.height = 38.0,
+    this.color = AppColor.blue,
+    this.borderColor = AppColor.blue,
+    required this.text,
+    this.textColor = AppColor.white,
+    this.fontSize = 16.0,
+    this.icon,
+    BorderRadius? borderRadius,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
+    this.isDisable = false,
+    Color? splashColor,
+    Color? highlightColor,
+  })  : borderRadius = borderRadius ?? BorderRadius.circular(10.0),
+        splashColor = splashColor ?? AppColor.grey.withOpacity(0.2),
+        highlightColor = highlightColor ?? AppColor.red.withOpacity(0.6);
+
   AppElevatedButton.outline({
     super.key,
     this.onPressed,

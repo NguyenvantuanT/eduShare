@@ -36,24 +36,24 @@ class _HomePageState extends State<HomePage> {
                   AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
             ),
           ),
-          SizedBox(
-            height: 250.0,
-            child: ListView.separated(
-              itemCount: 5,
-              padding: const EdgeInsets.only(left: 16.0),
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (_, __) => const SizedBox(width: 10.0),
-              itemBuilder: (_, __) {
-                return const CourseCard(
-                  subject: 'Mathematics',
-                  title: 'High School Algebra 1: Help and Review',
-                  imageUrl: 'path_to_math_image',
-                  completed: 5,
-                  total: 10,
-                );
-              },
-            ),
-          ),
+          // SizedBox(
+          //   height: 250.0,
+          //   child: ListView.separated(
+          //     itemCount: 5,
+          //     padding: const EdgeInsets.only(left: 16.0),
+          //     scrollDirection: Axis.horizontal,
+          //     separatorBuilder: (_, __) => const SizedBox(width: 10.0),
+          //     itemBuilder: (_, __) {
+          //       return const CourseCard(
+          //         subject: 'Mathematics',
+          //         title: 'High School Algebra 1: Help and Review',
+          //         imageUrl: 'path_to_math_image',
+          //         completed: 5,
+          //         total: 10,
+          //       );
+          //     },
+          //   ),
+          // ),
           const SizedBox(height: 20.0),
           SizedBox(
             height: 54.0,
@@ -89,24 +89,24 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          SizedBox(
-            height: 250.0,
-            child: ListView.separated(
-              itemCount: 5,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 16.0, top: 10.0),
-              separatorBuilder: (_, __) => const SizedBox(width: 10.0),
-              itemBuilder: (_, __) {
-                return const LessonCard(
-                  title: 'Bacterial Biology Overview',
-                  imageUrl: 'path_to_biology_image',
-                  lessonCount: 12,
-                  hours: 12,
-                  minutes: 20,
-                );
-              },
-            ),
-          ),
+          // SizedBox(
+          //   height: 250.0,
+          //   child: ListView.separated(
+          //     itemCount: 5,
+          //     scrollDirection: Axis.horizontal,
+          //     padding: const EdgeInsets.only(left: 16.0, top: 10.0),
+          //     separatorBuilder: (_, __) => const SizedBox(width: 10.0),
+          //     itemBuilder: (_, __) {
+          //       return const LessonCard(
+          //         title: 'Bacterial Biology Overview',
+          //         imageUrl: 'path_to_biology_image',
+          //         lessonCount: 12,
+          //         hours: 12,
+          //         minutes: 20,
+          //       );
+          //     },
+          //   ),
+          // ),
         ],
       ),
     );
