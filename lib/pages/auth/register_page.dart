@@ -5,13 +5,15 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
+import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
-import 'package:chat_app/services/remote/body/resigter_body.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -29,6 +31,13 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController confirmPassController = TextEditingController();
   StorageServices postImageServices = StorageServices();
   AuthServices authServices = AuthServices();
+  final _auth = FirebaseAuth.instance;
+
+  // tao tham chieu den collection task luu tru trong firebase
+  // de add, update, delete
+  CollectionReference userCollection =
+      FirebaseFirestore.instance.collection('users');
+
 
   ImagePicker picker = ImagePicker();
   final formKey = GlobalKey<FormState>();
@@ -42,39 +51,59 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() {});
   }
 
-  Future<void> onSubmit(BuildContext context) async {
-    if (formKey.currentState?.validate() == false) return;
+  Future<void> _onSubmit(BuildContext context) async {
+    if (formKey.currentState!.validate() == false) return;
+
     setState(() => isLoading = true);
-    ResigterBody body = ResigterBody()
-      ..name = usernameController.text.trim()
-      ..email = emailController.text.trim()
-      ..password = emailController.text.trim()
-      ..confirmPass = confirmPassController.text.trim()
-      ..avatar = fileAvatar != null
-          ? await postImageServices.post(image: fileAvatar!)
-          : null;
-    authServices.resigter(body).then((_) {
+
+    _auth
+        .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text)
+        .then((_) async {
+      UserModel user = UserModel()
+        ..name = usernameController.text.trim()
+        ..email = emailController.text.trim()
+        ..avatar = fileAvatar != null
+            ? await postImageServices.post(image: fileAvatar! , email: emailController.text.trim())
+            : null;
+
+      _addUser(user);
+
+
       if (!context.mounted) return;
       DelightToastShow.showToast(
         context: context,
-        text: "Sign Up Success",
-        icon: Icons.check,
+        text: 'Register successfully, please login 😍',
       );
+      
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => LoginPage(email: body.email ?? ''),
+          builder: (context) => LoginPage(email: emailController.text.trim()),
         ),
         (Route<dynamic> route) => false,
       );
-    }).catchError((error) {
-      dev.log("Failed to register: $error");
+    }).catchError((onError) {
+      FirebaseAuthException a = onError as FirebaseAuthException;
       if (!context.mounted) return;
       DelightToastShow.showToast(
         context: context,
-        text: 'Server error 😐',
-        icon: Icons.error,
+        text: a.message ?? '',
       );
-    }).whenComplete(() => setState(() => isLoading = true));
+      
+    }).whenComplete(() {
+      setState(() => isLoading = false);
+    });
+  }
+
+  void _addUser(UserModel user) {
+    userCollection
+        .doc(user.email)
+        .set(user.toJson()) // bản chất là update nếu chưa cs thì thêm mới có rồi thì update
+        .then((_) {})
+        .catchError((error) {
+      dev.log("Failed to add User: $error");
+    });
   }
 
   @override
@@ -113,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
               AppElevatedButton(
                 text: "Register",
                 isDisable: isLoading,
-                onPressed: () => onSubmit(context),
+                onPressed: () => _onSubmit(context),
               ),
               const SizedBox(height: 20.0),
               Row(

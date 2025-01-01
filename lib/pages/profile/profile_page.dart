@@ -6,6 +6,8 @@ import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/models/user_model.dart';
+import 'package:chat_app/pages/auth/change_password_page.dart';
+import 'package:chat_app/pages/course/course_page.dart';
 import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/pages/profile/widgets/information_card.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -26,7 +28,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   TextEditingController nameController = TextEditingController();
-  final emailController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   StorageServices postImageServices = StorageServices();
   ImagePicker picker = ImagePicker();
   final formKey = GlobalKey<FormState>();
@@ -50,16 +52,15 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _updateProfile(BuildContext context) async {
-    if (formKey.currentState!.validate() == false) return;
     setState(() => isLoading = true);
     await Future.delayed(const Duration(milliseconds: 1000));
     final body = UserModel()
       ..name = nameController.text.trim()
       ..email = emailController.text.trim()
       ..avatar = fileAvatar != null
-          ? await postImageServices.post(image: fileAvatar!)
+          ? await postImageServices.update(image: fileAvatar!)
           : SharedPrefs.user?.avatar ?? "";
-    accountServices.updateUser(body).then((_) {
+    accountServices.updateProfile(body).then((_) {
       SharedPrefs.user = body;
       if (!context.mounted) return;
       DelightToastShow.showToast(
@@ -117,19 +118,49 @@ class _ProfilePageState extends State<ProfilePage> {
                 InformationCard(
                   icon: AppImages.iconEmail,
                   title: 'Email',
+                  type: const Icon(
+                    Icons.lock,
+                    color: AppColor.textColor,
+                    size: 20.0,
+                  ),
                   infor: emailController.text,
                 ),
                 const SizedBox(height: 20.0),
-                const InformationCard(
+                InformationCard(
+                  icon: AppImages.iconPassword,
+                  title: 'Courses',
+                  type: const Icon(
+                    Icons.book,
+                    color: AppColor.textColor,
+                    size: 20.0,
+                  ),
+                  infor: 'Tab to get your courses',
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const CoursePage())),
+                ),
+                const SizedBox(height: 20.0),
+                InformationCard(
                   icon: AppImages.iconPassword,
                   title: 'Password',
+                  type: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColor.textColor,
+                    size: 13.0,
+                  ),
                   infor: 'Tab to change password',
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const ChangePasswordPage())),
                 ),
                 const SizedBox(height: 20.0),
                 InformationCard(
                   icon: AppImages.iconPrivacy,
                   title: 'Logout',
                   infor: 'Tab to logout',
+                  type: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColor.textColor,
+                    size: 13.0,
+                  ),
                   onPressed: () => AppDialog.confirmExitApp(context),
                 ),
                 const SizedBox(height: 50.0),

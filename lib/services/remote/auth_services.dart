@@ -17,9 +17,7 @@ class AuthServices implements ImplAuthServices {
   @override
   Future<dynamic> login(LoginBody body) async {
     await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: body.email ?? '',
-      password: body.password ?? '',
-    );
+        email: body.email ?? '', password: body.password ?? '');
   }
 
   @override
