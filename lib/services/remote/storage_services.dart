@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 class StorageServices {
   final _storage = FirebaseStorage.instance;
-
+  String email = SharedPrefs.user?.email ?? "";
   Future<String?> uploadUserImg(File file, String email) async {
     final snapshot =
         await _storage.ref("$email/Ava").child(email).putFile(file);
@@ -21,8 +21,37 @@ class StorageServices {
   }
 
   Future<String?> update({required File image}) async {
-    String email = SharedPrefs.user?.email ?? "";
+    
     await _storage.ref("$email/Ava").child(email).delete();
     return await uploadUserImg(image, email);
+  }
+
+
+  Future<String?> uploadUserImgCourse(File file , String id) async {
+    final snapshot =
+        await _storage.ref("$email/courses").child('$email-$id').putFile(file);
+    try {
+      return snapshot.ref.getDownloadURL();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> postImgeCourse({required File image, required String id}) async {
+    return await uploadUserImgCourse(image,id);
+  }
+
+  Future<String?> uploadUserVideo(File file, String id) async {
+    final snapshot =
+        await _storage.ref("$email/courses/video").child('$email-$id').putFile(file);
+    try {
+      return snapshot.ref.getDownloadURL();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> postVideo({required File image, required String id}) async {
+    return await uploadUserVideo(image, id);
   }
 }

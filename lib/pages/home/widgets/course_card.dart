@@ -1,27 +1,18 @@
 import 'package:chat_app/components/app_shadow.dart';
+import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {
-  const CourseCard({
-    super.key,
-    this.subject,
-    this.title,
-    this.imageUrl,
-    this.completed,
-    this.total,
-  });
-  final String? subject;
-  final String? title;
-  final String? imageUrl;
-  final int? completed;
-  final int? total;
+  const CourseCard(this.course, {super.key});
+
+  final CourseModel course;
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 180.0,
-      margin: const EdgeInsets.only(top: 8.0 , bottom: 8.0 , right: 8.0),
+      margin: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
       decoration: BoxDecoration(
           color: AppColor.white,
           borderRadius: BorderRadius.circular(8.0),
@@ -40,9 +31,9 @@ class CourseCard extends StatelessWidget {
             ),
             child: Center(
               child: Image.network(
-                imageUrl ?? '',
+                course.imageCourse ?? '',
                 height: 100,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
           ),
@@ -53,12 +44,12 @@ class CourseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subject ?? "",
+                  course.category ?? "",
                   style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  title ?? "",
+                  course.name ?? "",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppStyles.STYLE_12.copyWith(
@@ -70,10 +61,11 @@ class CourseCard extends StatelessWidget {
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(2.0),
-                        child: LinearProgressIndicator(
-                          value: (completed ?? 0) / (total ?? 0),
+                        child:const LinearProgressIndicator(
+                          // value: (completed ?? 0) / (total ?? 0),
+                          value: 5,
                           backgroundColor: AppColor.grey,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
+                          valueColor:  AlwaysStoppedAnimation<Color>(
                             AppColor.blue,
                           ),
                           minHeight: 4,
@@ -82,8 +74,9 @@ class CourseCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '$completed/$total',
-                      style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
+                      '5/10',
+                      style:
+                          AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
                     ),
                   ],
                 ),
