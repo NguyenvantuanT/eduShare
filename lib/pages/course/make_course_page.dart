@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
+import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/remote/course_services.dart';
+import 'package:chat_app/services/remote/storage_services.dart';
+import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MakeCoursePage extends StatefulWidget {
   const MakeCoursePage({super.key});
@@ -17,13 +22,55 @@ class MakeCoursePage extends StatefulWidget {
 
 class _MakeCoursePageState extends State<MakeCoursePage> {
   final nameCourseController = TextEditingController();
+  final categoryController = TextEditingController();
+  final describeController = TextEditingController();
+  ImagePicker picker = ImagePicker();
+  final formKey = GlobalKey<FormState>();
+  CourseServices courseServices = CourseServices();
+  StorageServices storageServices = StorageServices();
   File? imageCourse;
+  bool isLoading = false;
+
+  Future<void> pickImageCourse() async {
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+    if (file == null) return;
+    setState(() => imageCourse = File(file.path));
+  }
+
+  Future<void> _addCourse(BuildContext context) async {
+    if (formKey.currentState?.validate() == false) return;
+    setState(() => isLoading = true);
+
+    CourseModel course = CourseModel()
+      ..id = '${DateTime.now().millisecondsSinceEpoch}'
+      ..name = nameCourseController.text.trim()
+      ..category = categoryController.text.trim()
+      ..description = describeController.text.trim()
+      ..imageCourse = imageCourse != null
+          ? await storageServices.postImgeCourse(
+              image: imageCourse!,
+              id: '${DateTime.now().millisecondsSinceEpoch}')
+          : null;
+
+    courseServices.createCourse(course).then((_) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop;
+    }).catchError((onError) {
+      debugPrint("Failed to post: $onError");
+    }).whenComplete(() => setState(() {
+          nameCourseController.clear();
+          categoryController.clear();
+          describeController.clear();
+          isLoading = false;
+        }));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      body: Column(
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
           SizedBox(height: MediaQuery.of(context).padding.top + 6.0),
           Stack(
@@ -47,6 +94,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Form(
+              key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -60,6 +108,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                     controller: nameCourseController,
                     labelText: "e.g., how to ...",
                     textInputAction: TextInputAction.next,
+                    validator: Validator.required,
                   ),
                   const SizedBox(height: 20.0),
                   Text(
@@ -69,20 +118,51 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                   ),
                   const SizedBox(height: 10.0),
                   AppTextField(
-                    controller: nameCourseController,
+                    controller: categoryController,
                     labelText: "e.g., biology",
                     textInputAction: TextInputAction.next,
+                    validator: Validator.required,
                   ),
+                  const SizedBox(height: 10.0),
+                  Text(
+                    'Description ?',
+                    style: AppStyles.STYLE_14_BOLD
+                        .copyWith(color: AppColor.textColor),
+                  ),
+                  const SizedBox(height: 10.0),
+                  _buildTextFieldDes(),
                   const SizedBox(height: 10.0),
                   _buildSelectImage(),
                   const SizedBox(height: 50.0),
-                  AppElevatedButton(text: 'Make Course')
+                  AppElevatedButton(
+                    isDisable: isLoading,
+                    text: 'Make Course',
+                    onPressed: () => _addCourse(context),
+                  ),
                 ],
               ),
             ),
           )
         ],
       ),
+    );
+  }
+
+  TextField _buildTextFieldDes() {
+    OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
+          borderSide: BorderSide(color: color, width: 1.2),
+          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        );
+    return TextField(
+      maxLines: 5,
+      controller: describeController,
+      decoration: InputDecoration(
+          border: outlineInputBorder(AppColor.grey),
+          focusedBorder: outlineInputBorder(AppColor.grey),
+          hintText: 'e.g., describe',
+          hintStyle: AppStyles.STYLE_14.copyWith(
+            color: AppColor.textColor,
+          )),
     );
   }
 
@@ -119,7 +199,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
             ),
             const SizedBox(width: 10.0),
             GestureDetector(
-              onTap: () {},
+              onTap: pickImageCourse,
               child: Container(
                   height: 60.0,
                   width: 60.0,
@@ -129,10 +209,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                     border: Border.all(color: AppColor.greyText, width: 1.2),
                     color: AppColor.white,
                   ),
-                  child: const Icon(
-                    Icons.camera,
-                    color: AppColor.greyText,
-                  )),
+                  child: SvgPicture.asset(AppImages.iconCamera)),
             ),
           ],
         ),

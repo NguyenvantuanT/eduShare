@@ -1,6 +1,9 @@
+import 'package:chat_app/components/app_course_card.dart';
+import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/home/widgets/course_card.dart';
 import 'package:chat_app/pages/home/widgets/lesson_card.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/mess_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +20,24 @@ class _HomePageState extends State<HomePage> {
   ScrollController scrollController = ScrollController();
   MessServices messServices = MessServices();
   FocusNode messFocus = FocusNode();
-
+  CourseServices courseServices = CourseServices();
+  List<CourseModel> courses = [];
   int selectIndex = 0;
 
   List<String> categorys = ['Recommended', 'Algebra', 'Geometry', 'Flutter'];
+
+  Future<void> getCourses() async {
+    courseServices.getCourses().then((values) {
+      courses = values;
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +53,18 @@ class _HomePageState extends State<HomePage> {
                   AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
             ),
           ),
-          // SizedBox(
-          //   height: 250.0,
-          //   child: ListView.separated(
-          //     itemCount: 5,
-          //     padding: const EdgeInsets.only(left: 16.0),
-          //     scrollDirection: Axis.horizontal,
-          //     separatorBuilder: (_, __) => const SizedBox(width: 10.0),
-          //     itemBuilder: (_, __) {
-          //       return const CourseCard(
-          //         subject: 'Mathematics',
-          //         title: 'High School Algebra 1: Help and Review',
-          //         imageUrl: 'path_to_math_image',
-          //         completed: 5,
-          //         total: 10,
-          //       );
-          //     },
-          //   ),
-          // ),
+          SizedBox(
+            height: 250.0,
+            child: ListView.separated(
+              itemCount: courses.length,
+              padding: const EdgeInsets.only(left: 16.0),
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (_, __) => const SizedBox(width: 10.0),
+              itemBuilder: (_, idx) {
+                return CourseCard(courses[idx]);
+              },
+            ),
+          ),
           const SizedBox(height: 20.0),
           SizedBox(
             height: 54.0,
@@ -89,24 +100,18 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // SizedBox(
-          //   height: 250.0,
-          //   child: ListView.separated(
-          //     itemCount: 5,
-          //     scrollDirection: Axis.horizontal,
-          //     padding: const EdgeInsets.only(left: 16.0, top: 10.0),
-          //     separatorBuilder: (_, __) => const SizedBox(width: 10.0),
-          //     itemBuilder: (_, __) {
-          //       return const LessonCard(
-          //         title: 'Bacterial Biology Overview',
-          //         imageUrl: 'path_to_biology_image',
-          //         lessonCount: 12,
-          //         hours: 12,
-          //         minutes: 20,
-          //       );
-          //     },
-          //   ),
-          // ),
+          SizedBox(
+            height: 250.0,
+            child: ListView.separated(
+              itemCount: courses.length,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 16.0,top: 10.0),
+              separatorBuilder: (_, __) => const SizedBox(width: 10.0),
+              itemBuilder: (context, idx) {
+                return LessonCard(courses[idx]);
+              },
+            ),
+          ),
         ],
       ),
     );
