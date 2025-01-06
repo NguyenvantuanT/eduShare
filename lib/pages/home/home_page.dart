@@ -1,6 +1,5 @@
-import 'package:chat_app/components/app_course_card.dart';
 import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/pages/home/widgets/course_card.dart';
+import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/lesson_card.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/course_services.dart';
@@ -54,14 +53,14 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           SizedBox(
-            height: 250.0,
+            height: 188.0,
             child: ListView.separated(
               itemCount: courses.length,
               padding: const EdgeInsets.only(left: 16.0),
               scrollDirection: Axis.horizontal,
               separatorBuilder: (_, __) => const SizedBox(width: 10.0),
               itemBuilder: (_, idx) {
-                return CourseCard(courses[idx]);
+                return LearCourseCard(courses[idx]);
               },
             ),
           ),

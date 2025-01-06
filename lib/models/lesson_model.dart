@@ -1,7 +1,6 @@
 class LessonModel {
   String? id;
   String? name;
-  int? duration;
   String? videoPath;
   String? description;
 
@@ -11,7 +10,6 @@ class LessonModel {
     return LessonModel()
       ..id = json['id'] as String
       ..name = json['name'] as String
-      ..duration = json['duration'] as int
       ..videoPath = json['videoPath']
       ..description = json['description'];
   }
@@ -20,7 +18,6 @@ class LessonModel {
     return {
       'id': id,
       'name': name,
-      'duration': duration,
       'videoPath': videoPath,
       'description': description,
     };

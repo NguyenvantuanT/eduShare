@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ImplCourseServices {
   Future<List<CourseModel>> getCourses();
-  Future<void> createCourse(CourseModel course);
+  Future<CourseModel> createCourse(CourseModel course);
+  Future<void> updateCourse(CourseModel course);
 }
 
 class CourseServices extends ImplCourseServices {
@@ -30,5 +31,10 @@ class CourseServices extends ImplCourseServices {
         await courseCollection.add(course.toJson());
 
     return course..docId = doc.id;
+  }
+  
+  @override
+  Future<void> updateCourse(CourseModel course) async {
+    await courseCollection.doc(course.docId).update(course.toJson());
   }
 }
