@@ -1,4 +1,5 @@
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/lesson_card.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -60,7 +61,12 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               separatorBuilder: (_, __) => const SizedBox(width: 10.0),
               itemBuilder: (_, idx) {
-                return LearCourseCard(courses[idx]);
+                final course = courses[idx];
+                return LearCourseCard(
+                  course,
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CourseDetailPage(course))),
+                );
               },
             ),
           ),
@@ -104,7 +110,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView.separated(
               itemCount: courses.length,
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 16.0,top: 10.0),
+              padding: const EdgeInsets.only(left: 16.0, top: 10.0),
               separatorBuilder: (_, __) => const SizedBox(width: 10.0),
               itemBuilder: (context, idx) {
                 return LessonCard(courses[idx]);
