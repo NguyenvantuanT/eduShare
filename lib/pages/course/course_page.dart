@@ -57,7 +57,7 @@ class _CoursePageState extends State<CoursePage> {
             itemBuilder: (context, idx) => AppCourseCard(
               courses[idx],
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => EditCoursePage(courses[idx]),
+                builder: (context) => EditCoursePage(course: courses[idx]),
               )),
             ),
           ),

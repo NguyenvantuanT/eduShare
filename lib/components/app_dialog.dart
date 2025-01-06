@@ -2,11 +2,10 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
-import 'package:chat_app/pages/course/make_lesson_page.dart';
-import 'package:chat_app/pages/course/video_play_page.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
+import 'package:chat_app/utils/validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -176,9 +175,33 @@ class AppDialog {
     }
   }
 
-  static Future<void> showModal(
+  static TextField buildTextFieldDes(TextEditingController describeController) {
+    OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
+          borderSide: BorderSide(color: color, width: 1.2),
+          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        );
+    return TextField(
+      maxLines: 5,
+      textAlign: TextAlign.start,
+      controller: describeController,
+      decoration: InputDecoration(
+          border: outlineInputBorder(AppColor.grey),
+          focusedBorder: outlineInputBorder(AppColor.grey),
+          enabledBorder: outlineInputBorder(AppColor.grey),
+          labelText: 'e.g., describe...',
+          labelStyle: AppStyles.STYLE_14.copyWith(
+            color: AppColor.textColor,
+          )),
+    );
+  }
+
+  static Future<LessonModel?> showModal(
       BuildContext context, List<LessonModel> lessons) async {
-    await showModalBottomSheet<bool>(
+    final nameLessonsController = TextEditingController();
+    final describeController = TextEditingController();
+    final videoPathController = TextEditingController();
+
+    return showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.white,
@@ -206,135 +229,64 @@ class AppDialog {
                             horizontal: 130.0, vertical: 10.0),
                         height: 3.0,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'All Lessons',
-                            textAlign: TextAlign.left,
-                            style: AppStyles.STYLE_14_BOLD.copyWith(
-                              color: AppColor.textColor,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>  VideoPlayerScreen()),
-                            ),
-                            child: const CircleAvatar(
-                              backgroundColor: AppColor.greyText,
-                              radius: 16.0,
-                              child: CircleAvatar(
-                                radius: 15.0,
-                                backgroundColor: AppColor.bgColor,
-                                child: Icon(
-                                  Icons.add,
-                                  size: 18.0,
-                                  color: AppColor.blue,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+                      Text(
+                        'Name Your Lesson?',
+                        style: AppStyles.STYLE_14_BOLD
+                            .copyWith(color: AppColor.textColor),
+                      ),
+                      const SizedBox(height: 10.0),
+                      AppTextField(
+                        controller: nameLessonsController,
+                        labelText: "e.g., lesson ...",
+                        textInputAction: TextInputAction.next,
+                        validator: Validator.required,
                       ),
                       const SizedBox(height: 20.0),
-                      ...List.generate(lessons.length, (idx) {
-                        LessonModel lesson = lessons[idx];
-                        return Column(
-                          children: [
-                            Text(
-                              'Lesson $idx',
-                              style: AppStyles.STYLE_14
-                                  .copyWith(color: AppColor.textColor),
-                            ),
-                            Text(
-                              lesson.name ?? "",
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppStyles.STYLE_14
-                                  .copyWith(color: AppColor.textColor),
-                            ),
-                            const SizedBox(height: 5.0),
-                            Text('Tap to edit lesson',
-                                style: AppStyles.STYLE_14
-                                    .copyWith(color: AppColor.greyText)),
-                          ],
-                        );
-                      }),
+                      Text(
+                        'Description ?',
+                        style: AppStyles.STYLE_14_BOLD
+                            .copyWith(color: AppColor.textColor),
+                      ),
+                      const SizedBox(height: 10.0),
+                      buildTextFieldDes(describeController),
+                      const SizedBox(height: 20.0),
+                      Text(
+                        'Link Video?',
+                        style: AppStyles.STYLE_14_BOLD
+                            .copyWith(color: AppColor.textColor),
+                      ),
+                      const SizedBox(height: 10.0),
+                      AppTextField(
+                        controller: videoPathController,
+                        labelText: "e.g., path ...",
+                        textInputAction: TextInputAction.done,
+                        validator: Validator.required,
+                      ),
                     ],
                   ),
                 ),
                 Positioned(
-                    bottom: 20.0,
-                    left: 16.0,
-                    right: 16.0,
-                    child: AppElevatedButton.outline(text: 'Save'))
+                  bottom: 20.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: AppElevatedButton.outline(
+                    text: 'Save',
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                )
               ],
             ),
           );
-        });
+        }).then((value) {
+      if (value ?? false) {
+        LessonModel lesson = LessonModel()
+          ..id = '${DateTime.now().millisecondsSinceEpoch}'
+          ..name = nameLessonsController.text.trim()
+          ..description = describeController.text.trim()
+          ..videoPath = videoPathController.text.trim();
+        return lesson;
+      }
+      return null;
+    });
   }
 }
-
-// final nameController = TextEditingController();
-// final durationController = TextEditingController();
-// File? videoFile;
-// VideoPlayerController? videoController;
-// Future<File?> pickVideo() async {
-//   final ImagePicker picker = ImagePicker();
-//   final XFile? data = await picker.pickVideo(source: ImageSource.gallery);
-//   if (data == null) return null;
-//   return File(data.path);
-// }
-//  Text(
-//                       'Name Lesson?',
-//                       style: AppStyles.STYLE_14_BOLD
-//                           .copyWith(color: AppColor.textColor),
-//                     ),
-//                     const SizedBox(height: 10.0),
-//                     AppTextField(
-//                       controller: nameController,
-//                       labelText: "e.g., lesson",
-//                       textInputAction: TextInputAction.next,
-//                       validator: Validator.required,
-//                     ),
-//                     const SizedBox(height: 20.0),
-//                     Text(
-//                       'Name Lesson?',
-//                       style: AppStyles.STYLE_14_BOLD
-//                           .copyWith(color: AppColor.textColor),
-//                     ),
-//                     const SizedBox(height: 10.0),
-//                     AppTextField(
-//                       controller: durationController,
-//                       labelText: "e.g., timer",
-//                       textInputAction: TextInputAction.next,
-//                       validator: Validator.required,
-//                     ),
-//                     const SizedBox(height: 20.0),
-//                     Text(
-//                       'Video File?',
-//                       style: AppStyles.STYLE_14_BOLD
-//                           .copyWith(color: AppColor.textColor),
-//                     ),
-//                     if (videoController != null &&
-//                         videoController!.value.isInitialized)
-//                       AspectRatio(
-//                         aspectRatio: videoController!.value.aspectRatio,
-//                         child: VideoPlayer(videoController!),
-//                       ),
-//                     const SizedBox(height: 20),
-//                     const SizedBox(height: 20.0),
-//                     AppElevatedButton.outline(
-//                       text: 'Pick video',
-//                       onPressed: () async {
-//                         videoFile = await pickVideo();
-//                         if (videoFile != null) {
-//                           videoController =
-//                               VideoPlayerController.file(videoFile!)
-//                                 ..initialize().then((_) {
-//                                   setStatus(() {});
-//                                 });
-//                         }
-//                       },
-//                     ),

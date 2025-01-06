@@ -6,6 +6,7 @@ import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
@@ -44,6 +45,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
     CourseModel course = CourseModel()
       ..id = '${DateTime.now().millisecondsSinceEpoch}'
       ..name = nameCourseController.text.trim()
+      ..createBy = SharedPrefs.user?.email ?? ""
       ..category = categoryController.text.trim()
       ..description = describeController.text.trim()
       ..imageCourse = imageCourse != null

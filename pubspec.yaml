@@ -24,7 +24,8 @@ dependencies:
   shared_preferences: ^2.3.3
   shimmer: ^3.0.0
   video_player: ^2.9.2
-
+  youtube_player_flutter: ^9.1.1
+  better_player: ^0.0.84
 flutter_icons:
   android: "launcher_icon"
   ios: true
