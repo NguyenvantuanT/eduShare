@@ -1,4 +1,5 @@
-import 'package:chat_app/components/app_dialog.dart';
+
+import 'package:chat_app/components/app_show_modal_bottom.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/models/course_model.dart';
@@ -92,7 +93,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
           const SizedBox(height: 20.0),
           GestureDetector(
             onTap: () async {
-              LessonModel? lesson = await AppDialog.showModal(
+              LessonModel? lesson = await AppShowModalBottom.showModal(
                   context, widget.course.lessons ?? []);
               if (lesson == null) return;
               lessons.add(lesson);

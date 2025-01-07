@@ -1,20 +1,40 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/pages/lesson/lesson_page.dart';
+import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/remote/course_services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:readmore/readmore.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  const CourseDetailPage(this.course, {super.key});
+  const CourseDetailPage(this.docId, {super.key});
 
-  final CourseModel course;
+  final String docId;
 
   @override
   State<CourseDetailPage> createState() => _CourseDetailPageState();
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
+  CourseModel course = CourseModel();
+  CourseServices courseServices = CourseServices();
+
+  @override
+  void initState() {
+    super.initState();
+    getCourse();
+  }
+
+  void getCourse() {
+    courseServices.getCourse(widget.docId).then((value) {
+      course = value;
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +44,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           Stack(
             children: [
               CachedNetworkImage(
-                imageUrl: widget.course.imageCourse ?? "",
+                imageUrl: course.imageCourse ?? "",
                 fit: BoxFit.cover,
                 height: 200.0,
                 width: double.maxFinite,
@@ -108,14 +128,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.course.name ?? "",
+                          course.name ?? "",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.STYLE_18
                               .copyWith(color: AppColor.textColor),
                         ),
                         Text(
-                          widget.course.createBy ?? "",
+                          course.createBy ?? "",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.STYLE_14
@@ -134,7 +154,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                             const BorderRadius.all(Radius.circular(8.0)),
                       ),
                       child: Text(
-                        widget.course.category ?? "",
+                        course.category ?? "",
                         style:
                             AppStyles.STYLE_14.copyWith(color: AppColor.blue),
                       ),
@@ -149,7 +169,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 ),
                 const SizedBox(height: 15.0),
                 ReadMoreText(
-                  widget.course.description ?? "",
+                  course.description ?? "",
                   trimLines: 3,
                   trimMode: TrimMode.Line,
                   trimCollapsedText: " Read more",
@@ -168,28 +188,49 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: (widget.course.lessons ?? []).length,
+                  itemCount: (course.lessons ?? []).length,
                   separatorBuilder: (_, __) =>
-                      const Divider(color: AppColor.greyText),
+                      Divider(color: AppColor.greyText.withOpacity(0.5)),
                   itemBuilder: (context, idx) {
-                    final lesson = widget.course.lessons![idx];
-                    return Column(
-                      children: [
-                        Text(
-                          'Lesson: ${idx + 1}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppStyles.STYLE_14
-                              .copyWith(color: AppColor.textColor),
+                    final lesson = course.lessons![idx];
+                    return GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => LessonPage(
+                            docIdCourse: widget.docId,
+                            index: idx,
+                          ),
                         ),
-                        Text(
-                          lesson.name ?? "",
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppStyles.STYLE_14
-                              .copyWith(color: AppColor.textColor),
-                        ),
-                      ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Lesson: ${idx + 1}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppStyles.STYLE_14_BOLD
+                                      .copyWith(color: AppColor.textColor),
+                                ),
+                                Text(
+                                  lesson.name ?? "",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppStyles.STYLE_14
+                                      .copyWith(color: AppColor.textColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            AppImages.icArrowRightBig,
+                            height: 22.0,
+                            width: 22.0,
+                          )
+                        ],
+                      ),
                     );
                   },
                 )

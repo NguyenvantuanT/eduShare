@@ -4,7 +4,6 @@ import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/lesson_card.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/course_services.dart';
-import 'package:chat_app/services/remote/mess_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +17,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final messageController = TextEditingController();
   ScrollController scrollController = ScrollController();
-  MessServices messServices = MessServices();
   FocusNode messFocus = FocusNode();
   CourseServices courseServices = CourseServices();
   List<CourseModel> courses = [];
@@ -65,7 +63,8 @@ class _HomePageState extends State<HomePage> {
                 return LearCourseCard(
                   course,
                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => CourseDetailPage(course))),
+                      builder: (context) =>
+                          CourseDetailPage(course.docId ?? ""))),
                 );
               },
             ),
