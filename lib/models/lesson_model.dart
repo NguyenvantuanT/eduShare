@@ -10,8 +10,8 @@ class LessonModel {
     return LessonModel()
       ..id = json['id'] as String
       ..name = json['name'] as String
-      ..videoPath = json['videoPath']
-      ..description = json['description'];
+      ..videoPath = json['videoPath'] as String
+      ..description = json['description'] as String;
   }
 
   Map<String, dynamic> toJson() {
