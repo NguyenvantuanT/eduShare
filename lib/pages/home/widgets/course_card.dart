@@ -1,34 +1,44 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
-class LessonCard extends StatelessWidget {
-  const LessonCard(this.course, {super.key});
+class CourseCard extends StatelessWidget {
+  const CourseCard(this.course, {super.key, this.onPressed});
   final CourseModel course;
+  final Function()? onPressed;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180.0,
+    return GestureDetector(
+      onTap: onPressed,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             height: 140.0,
             decoration: const BoxDecoration(
                 color: AppColor.blue,
                 borderRadius: BorderRadius.all(Radius.circular(12.0))),
-            child: Center(
-              child: Image.network(
-                course.imageCourse ?? "",
-                height: 100,
-                fit: BoxFit.contain,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+              child: CachedNetworkImage(
+                imageUrl: course.imageCourse ?? "",
+                fit: BoxFit.cover,
+                height: 83.0,
+                errorWidget: (context, __, ___) => const AppSimmer(
+                  height: 83.0,
+                ),
+                placeholder: (context, __) => const AppSimmer(
+                  height: 83.0,
+                ),
               ),
             ),
           ),
           // Content padding
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,7 +65,7 @@ class LessonCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${12}h ${0.0}m',
+                      '${12}h',
                       style:
                           AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
                     ),

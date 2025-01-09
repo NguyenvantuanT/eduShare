@@ -3,6 +3,7 @@ import 'package:chat_app/pages/auth/change_password_page.dart';
 import 'package:chat_app/pages/auth/forgot_password_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
+import 'package:chat_app/pages/search/search_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -21,23 +22,23 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> pages = const [
     HomePage(),
+    SearchPage(),
+    ForgotPasswordPage(),
     ProfilePage(),
-    ChangePasswordPage(),
-    ForgotPasswordPage()
   ];
 
   List<String> lables = [
     'Home',
-    'Profile',
     'Search',
-    'Search',
+    'Learning',
+    'Favorite',
   ];
 
   List<String> icons = [
     AppImages.iconHome,
     AppImages.iconSearch,
     AppImages.iconBriefCase,
-    AppImages.iconUser,
+    AppImages.iconFavorite,
   ];
 
   @override

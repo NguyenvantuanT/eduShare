@@ -1,4 +1,4 @@
-import 'package:chat_app/components/app_show_modal_bottom.dart';
+import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -26,6 +26,9 @@ class _LessonPageState extends State<LessonPage> {
   LessonModel lesson = LessonModel();
   List<LessonModel> lessons = [];
   late int lessonIndex;
+
+  List<String> tabNames = ['Information', 'Lessons'];
+  int selectIndex = 0;
 
   @override
   void initState() {
@@ -124,94 +127,81 @@ class _LessonPageState extends State<LessonPage> {
       bottom: 56.0,
       child: ListView(
         children: [
-          Text(
-            'All Lessons',
-            style: AppStyles.STYLE_16_BOLD.copyWith(color: AppColor.textColor),
-          ),
-          const SizedBox(height: 15.0),
-          GestureDetector(
-            onTap: () {
-              AppShowModalBottom.showAllLesson(context, lessons, lessonIndex);
-            },
-            child: Container(
-              height: 48.0,
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              decoration: BoxDecoration(
-                color: AppColor.white,
-                border: Border.all(color: AppColor.grey, width: 1.2),
-                borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text('Lesson $lessonIndex : ',
-                      style: AppStyles.STYLE_14.copyWith(
-                          color: AppColor.textColor,
-                          fontWeight: FontWeight.w600)),
-                  const SizedBox(width: 4.0),
-                  Text(lesson.name ?? "",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppStyles.STYLE_14
-                          .copyWith(color: AppColor.textColor)),
-                  const Spacer(),
-                  const Icon(
-                    Icons.arrow_drop_down,
-                    color: AppColor.grey,
-                    size: 30.0,
-                  )
-                ],
-              ),
+          Container(
+            height: 50.0,
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: AppColor.blue.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Row(
+              children: List.generate(tabNames.length, (idx) {
+                final tabName = tabNames[idx];
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => selectIndex = idx),
+                    child: Container(
+                      height: 45.0,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: idx == selectIndex
+                            ? AppColor.blue
+                            : Colors.transparent,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      child: Text(tabName,
+                          style: AppStyles.STYLE_14.copyWith(
+                            color: idx == selectIndex
+                                ? AppColor.white
+                                : AppColor.textColor,
+                          )),
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
-          _buildLessonTab(),
-          const SizedBox(height: 15.0),
-          Row(
+          IndexedStack(
+            index: selectIndex,
             children: [
-              Text('Duration: ',
-                  style: AppStyles.STYLE_14.copyWith(
-                    color: AppColor.textColor,
-                  )),
-              const SizedBox(width: 4.6),
-              Text('10h',
-                  style: AppStyles.STYLE_14.copyWith(
-                    color: AppColor.textColor,
-                  )),
+              _buildInformation(),
+              _buildLessonTab(),
             ],
-          ),
-          const SizedBox(height: 10.0),
-          const Text(
-            '------ Description ------',
-            style: TextStyle(
-                color: AppColor.black,
-                fontSize: 16.0,
-                fontWeight: FontWeight.w500),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4.6),
-          Text(
-            lesson.description ?? '-:-',
-            style: const TextStyle(
-              color: AppColor.black,
-              fontSize: 14.0,
-            ),
           ),
         ],
       ),
     );
   }
 
-  GridView _buildLessonTab() {
-    return GridView(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 6.8,
-        crossAxisSpacing: 0.0,
-        mainAxisExtent: 20.0,
-      ),
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
+  Widget _buildInformation() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 10.0),
+        Text(
+          'Description ',
+          style: AppStyles.STYLE_16.copyWith(
+            color: AppColor.black,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4.6),
+        Text(
+          textAlign: TextAlign.center,
+          lesson.description ?? '-:-',
+          style: AppStyles.STYLE_14.copyWith(
+            color: AppColor.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLessonTab() {
+    return Column(
       children: List.generate(
         lessons.length,
         (index) => GestureDetector(
@@ -221,13 +211,36 @@ class _LessonPageState extends State<LessonPage> {
             controller?.load(lesson.videoPath!);
             setState(() {});
           },
-          child: Text(
-            'Lesson ${index + 1}',
-            style: AppStyles.STYLE_14.copyWith(
-                color:
-                    index == lessonIndex ? AppColor.textColor : AppColor.grey,
-                fontWeight:
-                    index == lessonIndex ? FontWeight.w600 : FontWeight.w400),
+          child: Container(
+            height: 50.0,
+            margin: const EdgeInsets.only(top: 20.0),
+            padding: const EdgeInsets.only(left: 15.0),
+            decoration: const BoxDecoration(
+              color: AppColor.bgColor,
+              boxShadow: AppShadow.boxShadowContainer,
+              borderRadius: BorderRadius.all(Radius.circular(6.0)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Lesson ${index + 1}: ${lessons[index].name}',
+                    style: AppStyles.STYLE_14.copyWith(
+                      color: lessonIndex == index
+                          ? AppColor.textColor
+                          : AppColor.greyText,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.play_circle,
+                      color:
+                          lessonIndex == index ? AppColor.blue : AppColor.grey),
+                  onPressed: () {},
+                ),
+              ],
+            ),
           ),
         ),
       ),

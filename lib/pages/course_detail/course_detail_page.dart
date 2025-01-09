@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -48,34 +49,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 fit: BoxFit.cover,
                 height: 200.0,
                 width: double.maxFinite,
-                errorWidget: (context, __, ___) {
-                  return Container(
-                    height: 83.0,
-                    decoration: const BoxDecoration(
-                      color: AppColor.blue,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        topRight: Radius.circular(8),
-                      ),
-                    ),
-                    child:
-                        const Icon(Icons.error_rounded, color: AppColor.white),
-                  );
-                },
-                placeholder: (context, __) {
-                  return const SizedBox.square(
-                    dimension: 20.0,
-                    child: Center(
-                      child: SizedBox.square(
-                        dimension: 26.0,
-                        child: CircularProgressIndicator(
-                          color: AppColor.white,
-                          strokeWidth: 2.0,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                errorWidget: (context, __, ___) => const AppSimmer(height: 200.0),
+                placeholder: (_, __) => const AppSimmer(height: 200.0),
               ),
               Positioned(
                 child: GestureDetector(
