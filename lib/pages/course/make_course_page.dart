@@ -49,22 +49,22 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
       ..category = categoryController.text.trim()
       ..description = describeController.text.trim()
       ..imageCourse = imageCourse != null
-          ? await storageServices.postImgeCourse(
-              image: imageCourse!,
-              id: '${DateTime.now().millisecondsSinceEpoch}')
+          ? await storageServices.post(image: imageCourse!)
           : null;
 
     courseServices.createCourse(course).then((_) {
-      if (!context.mounted) return;
       Navigator.of(context).pop;
     }).catchError((onError) {
       debugPrint("Failed to post: $onError");
-    }).whenComplete(() => setState(() {
-          nameCourseController.clear();
-          categoryController.clear();
-          describeController.clear();
-          isLoading = false;
-        }));
+    }).whenComplete(() => setState(() => isLoading = false));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    nameCourseController.dispose();
+    categoryController.dispose();
+    describeController.dispose();
   }
 
   @override

@@ -58,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ..name = nameController.text.trim()
       ..email = emailController.text.trim()
       ..avatar = fileAvatar != null
-          ? await postImageServices.update(image: fileAvatar!)
+          ? await postImageServices.post(image: fileAvatar!)
           : SharedPrefs.user?.avatar ?? "";
     accountServices.updateProfile(body).then((_) {
       SharedPrefs.user = body;
@@ -136,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   infor: 'Tab to get your courses',
                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const CoursePage())),
+                      builder: (context) => const MyCoursePage())),
                 ),
                 const SizedBox(height: 20.0),
                 InformationCard(

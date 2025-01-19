@@ -5,15 +5,13 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
-import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/auth/login_page.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
+import 'package:chat_app/services/remote/body/resigter_body.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -31,14 +29,6 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController confirmPassController = TextEditingController();
   StorageServices postImageServices = StorageServices();
   AuthServices authServices = AuthServices();
-  final _auth = FirebaseAuth.instance;
-
-  // tao tham chieu den collection task luu tru trong firebase
-  // de add, update, delete
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users');
-
-
   ImagePicker picker = ImagePicker();
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -52,59 +42,47 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _onSubmit(BuildContext context) async {
-    if (formKey.currentState!.validate() == false) return;
-
+    if (formKey.currentState!.validate() == false) {
+      return;
+    }
     setState(() => isLoading = true);
 
-    _auth
-        .createUserWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text)
-        .then((_) async {
-      UserModel user = UserModel()
-        ..name = usernameController.text.trim()
-        ..email = emailController.text.trim()
-        ..avatar = fileAvatar != null
-            ? await postImageServices.post(image: fileAvatar! , email: emailController.text.trim())
-            : null;
+    RegisterBody body = RegisterBody()
+      ..name = usernameController.text.trim()
+      ..email = emailController.text.trim()
+      ..password = passwordController.text
+      ..avatar = fileAvatar != null
+          ? await postImageServices.post(image: fileAvatar!)
+          : null;
 
-      _addUser(user);
-
-
+    authServices.register(body).then((_) {
       if (!context.mounted) return;
       DelightToastShow.showToast(
         context: context,
         text: 'Register successfully, please login 😍',
       );
-      
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => LoginPage(email: emailController.text.trim()),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    }).catchError((onError) {
-      FirebaseAuthException a = onError as FirebaseAuthException;
+
+      Navigator.of(context)
+          .pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => LoginPage(email: body.email ?? ''),
+            ),
+            (Route<dynamic> route) => false,
+          )
+          .catchError((error) {});
+    }).catchError((error) {
+      dev.log("Failed to register: $error");
       if (!context.mounted) return;
       DelightToastShow.showToast(
         context: context,
-        text: a.message ?? '',
+        text: 'Server error 😐',
       );
-      
-    }).whenComplete(() {
-      setState(() => isLoading = false);
-    });
+    }).whenComplete(
+      () => setState(() => isLoading = false),
+    );
   }
 
-  void _addUser(UserModel user) {
-    userCollection
-        .doc(user.email)
-        .set(user.toJson()) // bản chất là update nếu chưa cs thì thêm mới có rồi thì update
-        .then((_) {})
-        .catchError((error) {
-      dev.log("Failed to add User: $error");
-    });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {

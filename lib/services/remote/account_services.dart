@@ -10,18 +10,27 @@ abstract class ImplAccountServices {
 class AccountServices implements ImplAccountServices {
   @override
   Future<dynamic> getProfile(String email) async {
-    CollectionReference userCollection =
-        FirebaseFirestore.instance.collection('users'); 
-    DocumentSnapshot<Object?> snapshot = await userCollection.doc(email).get();
-    SharedPrefs.user =
-        UserModel.fromJson(snapshot.data() as Map<String, dynamic>);
+    try {
+      CollectionReference userCollection =
+          FirebaseFirestore.instance.collection('users'); // tham chieu
+      DocumentSnapshot<Object?> snapshot =
+          await userCollection.doc(email).get();
+      SharedPrefs.user =
+          UserModel.fromJson(snapshot.data() as Map<String, dynamic>);
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
   }
 
   @override
   Future<dynamic> updateProfile(UserModel body) async {
     UserModel user = SharedPrefs.user ?? UserModel();
+    try {
       CollectionReference userCollection =
-          FirebaseFirestore.instance.collection('users'); 
-    await userCollection.doc(user.email).update(body.toJson());
+          FirebaseFirestore.instance.collection('users'); // tham chieu
+      await userCollection.doc(user.email).update(body.toJson());
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
   }
 }

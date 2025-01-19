@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
+import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -26,30 +27,14 @@ class AppCourseCard extends StatelessWidget {
                   fit: BoxFit.cover,
                   width: 171.0,
                   height: 162.0,
-                  errorWidget: (context, __, ___) {
-                    return Container(
-                      width: 171.0,
-                      height: 162.0,
-                      color: AppColor.blue,
-                      child: const Center(
-                        child: Icon(Icons.error_rounded, color: AppColor.white),
-                      ),
-                    );
-                  },
-                  placeholder: (context, __) {
-                    return const SizedBox.square(
-                      dimension: 20.0,
-                      child: Center(
-                        child: SizedBox.square(
-                          dimension: 26.0,
-                          child: CircularProgressIndicator(
-                            color: AppColor.white,
-                            strokeWidth: 2.0,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                  errorWidget: (context, __, ___) => const AppSimmer(
+                    width: 171.0,
+                    height: 162.0,
+                  ),
+                  placeholder: (context, __) => const AppSimmer(
+                    width: 171.0,
+                    height: 162.0,
+                  ),
                 ),
               )),
           Expanded(

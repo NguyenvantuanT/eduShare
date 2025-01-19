@@ -3,19 +3,16 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
-import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/auth/forgot_password_page.dart';
 import 'package:chat_app/pages/auth/register_page.dart';
 import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/account_services.dart';
 import 'package:chat_app/services/remote/auth_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
+import 'package:chat_app/services/remote/body/login_body.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -33,9 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   AuthServices authServices = AuthServices();
   AccountServices accountServices = AccountServices();
   bool isLoading = false;
-  final _auth = FirebaseAuth.instance;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users');
+
   @override
   void initState() {
     super.initState();
@@ -43,43 +38,34 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submitLogin(BuildContext context) async {
-    if (formKey.currentState?.validate() == false) return;
-
+    if (formKey.currentState?.validate() == false) {
+      return;
+    }
     setState(() => isLoading = true);
-    _auth
-        .signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text)
-        .then((_) {
-      if (!context.mounted) return;
-      _getUser(context);
+
+    LoginBody body = LoginBody()
+      ..email = emailController.text.trim()
+      ..password = passwordController.text;
+
+    authServices.login(body).then((_) {
+      accountServices.getProfile(body.email ?? '').then((_) {
+        if (!context.mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => const MainPage(),
+          ),
+          (route) => false,
+        );
+      }).catchError((onError) {});
     }).catchError((onError) {
-      setState(() => isLoading = false);
       if (!context.mounted) return;
       DelightToastShow.showToast(
         context: context,
         text: 'Email or Password is wrong😐',
       );
-    });
-  }
-
-  void _getUser(BuildContext context) {
-    userCollection
-        .doc(emailController.text)
-        .get()
-        .then((snapshot) {
-          final data = snapshot.data() as Map<String, dynamic>;
-          SharedPrefs.user = UserModel.fromJson(data);
-          if (!context.mounted) return;
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const MainPage(),
-            ),
-            (route) => false,
-          );
-        })
-        .catchError((onError) {})
-        .whenComplete(() => setState(() => isLoading = false));
+    }).whenComplete(
+      () => setState(() => isLoading = false),
+    );
   }
 
   @override

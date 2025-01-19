@@ -1,5 +1,4 @@
 import 'package:chat_app/components/app_tab_bar.dart';
-import 'package:chat_app/pages/auth/change_password_page.dart';
 import 'package:chat_app/pages/auth/forgot_password_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';

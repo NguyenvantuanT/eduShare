@@ -1,44 +1,60 @@
-import 'package:chat_app/models/user_model.dart';
-import 'package:chat_app/services/remote/body/change_password_body.dart';
-import 'package:chat_app/services/remote/body/forgot_password_body.dart';
-import 'package:chat_app/services/remote/body/login_body.dart';
 import 'package:chat_app/services/remote/body/resigter_body.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../models/user_model.dart';
+import 'body/change_password_body.dart';
+import 'body/forgot_password_body.dart';
+import 'body/login_body.dart';
 
 abstract class ImplAuthServices {
+  Future<dynamic> register(RegisterBody body);
   Future<dynamic> login(LoginBody body);
-  Future<dynamic> resigter(ResigterBody body);
   Future<dynamic> forgotPassword(ForgotPasswordBody body);
-  Future<bool> changePassword(ChangePasswordBody body);
+  Future<dynamic> changePassword(ChangePasswordBody body);
 }
 
 class AuthServices implements ImplAuthServices {
   @override
+  Future<dynamic> register(RegisterBody body) async {
+    try {
+      CollectionReference userCollection =
+          FirebaseFirestore.instance.collection('users'); // tham chieu
+
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: body.email ?? '', password: body.password ?? '');
+
+      UserModel user = UserModel()
+        ..name = body.name
+        ..email = body.email
+        ..avatar = body.avatar;
+      await userCollection.doc(user.email).set(user.toJson());
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
   Future<dynamic> login(LoginBody body) async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: body.email ?? '', password: body.password ?? '');
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: body.email ?? '', password: body.password ?? '');
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
+    }
   }
 
   @override
-  Future<dynamic> resigter(ResigterBody body) async {
-    CollectionReference userCollection =
-        FirebaseFirestore.instance.collection('users');
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: body.email ?? "",
-      password: body.password ?? "",
-    );
-
-    UserModel user = UserModel()
-      ..avatar = body.avatar ?? ""
-      ..name = body.name ?? ""
-      ..email = body.email ?? "";
-
-    await userCollection.doc(user.email).set(user.toJson());
+  Future<dynamic> forgotPassword(ForgotPasswordBody body) async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: body.email ?? '');
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
+    }
   }
 
   @override
-  Future<bool> changePassword(ChangePasswordBody body) async {
+  Future<dynamic> changePassword(ChangePasswordBody body) async {
     try {
       final loginUser = FirebaseAuth.instance.currentUser;
       final credential = EmailAuthProvider.credential(
@@ -46,15 +62,10 @@ class AuthServices implements ImplAuthServices {
         password: body.currentPassword ?? '',
       );
       await loginUser?.reauthenticateWithCredential(credential);
-      await loginUser?.updatePassword(body.newPassword ?? '');
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
 
-  @override
-  Future<dynamic> forgotPassword(ForgotPasswordBody body) async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: body.email ?? '');
+      await loginUser?.updatePassword(body.newPassword ?? '');
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
+    }
   }
 }

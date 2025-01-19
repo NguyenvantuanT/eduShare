@@ -1,4 +1,4 @@
-class ResigterBody {
+class RegisterBody {
   String? avatar;
   String? name;
   String? email;
