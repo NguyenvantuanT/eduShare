@@ -1,4 +1,5 @@
 import 'package:chat_app/components/app_course_card.dart';
+import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/course/edit_course_page.dart';
@@ -27,6 +28,15 @@ class _MyCoursePageState extends State<MyCoursePage> {
       .orderBy('id', descending: true)
       .snapshots();
 
+  void deleteCourse(BuildContext context, String docId) {
+    AppDialog.dialog(
+      context,
+      title: const Icon(Icons.delete, color: AppColor.blue,),
+      content: "Do you want delete this course ? 😢",
+      action: () => courseServices.deleteCourse(docId),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +52,13 @@ class _MyCoursePageState extends State<MyCoursePage> {
                 child: CircularProgressIndicator(color: AppColor.blue),
               );
             }
-            
+
             List<CourseModel> courses = (snapshot.data?.docs
-                .map((e) => CourseModel.fromJson((e.data() as Map<String, dynamic>))..docId = e.id)
-                .toList() ?? [] )
+                        .map((e) => CourseModel.fromJson(
+                            (e.data() as Map<String, dynamic>))
+                          ..docId = e.id)
+                        .toList() ??
+                    [])
                 .where((e) => e.createBy == email)
                 .toList();
 
@@ -62,21 +75,24 @@ class _MyCoursePageState extends State<MyCoursePage> {
                 ),
                 const SizedBox(height: 15.0),
                 ListView.separated(
-                  itemCount: courses.length,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (_, __) => const SizedBox(height: 15.0),
-                  itemBuilder: (context, idx) => AppCourseCard(
-                    courses.reversed.toList()[idx],
-                    onPressed: () =>
-                        Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => EditCoursePage(
-                        courses[idx].docId ?? "",
-                      ),
-                    )),
-                  ),
-                ),
+                    itemCount: courses.length,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    separatorBuilder: (_, __) => const SizedBox(height: 15.0),
+                    itemBuilder: (context, idx) {
+                      final course = courses.reversed.toList()[idx];
+                      return AppCourseCard(
+                        course,
+                        onLeftPressed: () => deleteCourse(context, course.docId ?? ""),
+                        onRigthPressed: () => Navigator.of(context).push( MaterialPageRoute(
+                            builder: (context) => EditCoursePage(
+                              course.docId ?? "",
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
               ],
             );
           }),

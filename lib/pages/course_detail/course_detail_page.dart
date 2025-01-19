@@ -1,10 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/local/shared_prefs.dart';
+import 'package:chat_app/services/remote/account_services.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,7 +26,10 @@ class CourseDetailPage extends StatefulWidget {
 class _CourseDetailPageState extends State<CourseDetailPage> {
   CourseModel course = CourseModel();
   CourseServices courseServices = CourseServices();
-
+  AccountServices accountServices = AccountServices();
+  List<String> favorites = [];
+  bool isFavorite = false;
+  UserModel userModel = SharedPrefs.user ?? UserModel();
   @override
   void initState() {
     super.initState();
@@ -32,6 +39,53 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   void getCourse() {
     courseServices.getCourse(widget.docId).then((value) {
       course = value;
+      favorites = userModel.favorites ?? [];
+      isFavorite = favorites.any((e) => e == course.docId);
+      setState(() {});
+    });
+  }
+
+  void addLearning(BuildContext context) {
+    UserModel body = (SharedPrefs.user ?? UserModel())
+      ..learnings = [course.docId ?? ""];
+    accountServices.updateProfile(body).then((_) {
+      SharedPrefs.user = body;
+      if (!context.mounted) return;
+      DelightToastShow.showToast(
+          context: context,
+          text: 'Course has been add your learning 😍',
+          color: AppColor.bgColor);
+      setState(() {});
+    });
+  }
+
+  void addFavorite(BuildContext context) {
+    UserModel body = (SharedPrefs.user ?? UserModel())
+      ..favorites = [...favorites, course.docId ?? ""];
+      debugPrint(body.toJson().toString());
+    accountServices.updateProfile(body).then((_) {
+      SharedPrefs.user = body;
+      isFavorite = (body.favorites ?? []).any((e) => e == course.docId);
+      if (!context.mounted) return;
+      DelightToastShow.showToast(
+          context: context,
+          text: 'Course has been add your favorites 😍',
+          color: AppColor.bgColor);
+      setState(() {});
+    });
+  }
+
+  void remoteFavorite(BuildContext context) async {
+    UserModel body = (SharedPrefs.user ?? UserModel())
+      ..favorites = favorites.where((e) => e != course.docId).toList();
+    accountServices.updateProfile(body).then((_) {
+      SharedPrefs.user = body;
+      isFavorite = (body.favorites ?? []).any((e) => e == course.docId);
+      if (!context.mounted) return;
+      DelightToastShow.showToast(
+          context: context,
+          text: 'Course has been remote your favorites 😍',
+          color: AppColor.bgColor);
       setState(() {});
     });
   }
@@ -49,7 +103,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 fit: BoxFit.cover,
                 height: 200.0,
                 width: double.maxFinite,
-                errorWidget: (context, __, ___) => const AppSimmer(height: 200.0),
+                errorWidget: (context, __, ___) =>
+                    const AppSimmer(height: 200.0),
                 placeholder: (_, __) => const AppSimmer(height: 200.0),
               ),
               Positioned(
@@ -136,7 +191,43 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 30.0),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => addLearning(context),
+                      child: Container(
+                        height: 30.0,
+                        margin: const EdgeInsets.symmetric(vertical: 15.0)
+                            .copyWith(right: 10.0),
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 5.0),
+                        decoration: BoxDecoration(
+                          color: AppColor.blue.withOpacity(0.25),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                        child: Text(
+                          "Add to lear",
+                          style:
+                              AppStyles.STYLE_14.copyWith(color: AppColor.blue),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => addFavorite(context),
+                      child: isFavorite
+                          ? const Icon(
+                              Icons.favorite,
+                              color: AppColor.blue,
+                            )
+                          : const Icon(
+                              Icons.favorite_outline,
+                              color: AppColor.greyText,
+                            ),
+                    ),
+                  ],
+                ),
                 Text(
                   'Description',
                   style: AppStyles.STYLE_16_BOLD

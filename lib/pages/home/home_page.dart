@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   CourseServices courseServices = CourseServices();
   List<CourseModel> courses = [];
   int selectIndex = 0;
+  bool isLoading = false;
 
   List<String> categorys = [
     'Mobile Application',
@@ -38,10 +39,11 @@ class _HomePageState extends State<HomePage> {
   ];
 
   Future<void> getCourses() async {
+    setState(() => isLoading = true);
     courseServices.getListCourse().then((values) {
       courses = values;
       setState(() {});
-    });
+    }).whenComplete(() => setState(() => isLoading = false));
   }
 
   @override
@@ -54,100 +56,106 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-            child: Text(
-              'Recent learning',
-              style:
-                  AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
-            ),
-          ),
-          SizedBox(
-            height: 180.0,
-            child: ListView.separated(
-              itemCount: courses.length,
-              padding: const EdgeInsets.only(left: 16.0),
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (_, __) => const SizedBox(width: 10.0),
-              itemBuilder: (_, idx) {
-                final course = courses[idx];
-                return LearCourseCard(
-                  course,
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          CourseDetailPage(course.docId ?? ""),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 20.0),
-          SizedBox(
-            height: 54.0,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(categorys.length, (idx) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5.0,
-                    ).copyWith(bottom: 6.0),
-                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                    decoration: BoxDecoration(
-                        color: AppColor.bgColor,
-                        border: Border(
-                            bottom: BorderSide(
-                                color: idx == selectIndex
-                                    ? AppColor.blue
-                                    : AppColor.bgColor,
-                                width: 3.0))),
-                    child: GestureDetector(
-                      onTap: () => setState(() => selectIndex = idx),
-                      child: Text(
-                        categorys[idx],
-                        style: AppStyles.STYLE_14_BOLD.copyWith(
-                            color: idx == selectIndex
-                                ? AppColor.textColor
-                                : AppColor.greyText),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-          GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10.0,
-              childAspectRatio: 2 / 3,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
-              top: 16.0,
-              bottom: 20.0,
-            ),
-            physics: const AlwaysScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: courses.length,
-            itemBuilder: (context, index) {
-              final course = courses[index];
-              return CourseCard(
-                course,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => CourseDetailPage(course.docId ?? ""),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColor.blue),
+            )
+          : ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                  child: Text(
+                    'Recent learning',
+                    style: AppStyles.STYLE_14_BOLD
+                        .copyWith(color: AppColor.textColor),
                   ),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+                SizedBox(
+                  height: 180.0,
+                  child: ListView.separated(
+                    itemCount: courses.length,
+                    padding: const EdgeInsets.only(left: 16.0),
+                    scrollDirection: Axis.horizontal,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10.0),
+                    itemBuilder: (_, idx) {
+                      final course = courses[idx];
+                      return LearCourseCard(
+                        course,
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CourseDetailPage(course.docId ?? ""),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20.0),
+                SizedBox(
+                  height: 54.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(categorys.length, (idx) {
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0,
+                          ).copyWith(bottom: 6.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                          decoration: BoxDecoration(
+                              color: AppColor.bgColor,
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color: idx == selectIndex
+                                          ? AppColor.blue
+                                          : AppColor.bgColor,
+                                      width: 3.0))),
+                          child: GestureDetector(
+                            onTap: () => setState(() => selectIndex = idx),
+                            child: Text(
+                              categorys[idx],
+                              style: AppStyles.STYLE_14_BOLD.copyWith(
+                                  color: idx == selectIndex
+                                      ? AppColor.textColor
+                                      : AppColor.greyText),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10.0,
+                    childAspectRatio: 2 / 3,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
+                    top: 16.0,
+                    bottom: 20.0,
+                  ),
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index];
+                    return CourseCard(
+                      course,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CourseDetailPage(course.docId ?? ""),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
     );
   }
 }
