@@ -23,13 +23,15 @@ class AppShowModalBottom {
         ),
         builder: (context) {
           return FractionallySizedBox(
-            heightFactor: 0.4,
+            heightFactor: 0.5,
             child: StatefulBuilder(builder: (context, setStatus) {
               return ListView.separated(
                 itemCount: lessons.length,
                 padding: const EdgeInsets.symmetric(horizontal: 16.0)
                     .copyWith(top: 30.0, bottom: 20.0),
-                separatorBuilder: (_, __) =>  Divider(color: AppColor.grey.withOpacity(0.5),),
+                separatorBuilder: (_, __) => Divider(
+                  color: AppColor.grey.withOpacity(0.5),
+                ),
                 itemBuilder: (context, index) {
                   final lesson = lessons[index];
                   return Row(
@@ -109,7 +111,6 @@ class AppShowModalBottom {
 
     return showModalBottomSheet<bool>(
         context: context,
-        isScrollControlled: true,
         backgroundColor: Colors.white,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -118,70 +119,55 @@ class AppShowModalBottom {
           ),
         ),
         builder: (context) {
-          return FractionallySizedBox(
-            heightFactor: 0.67,
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 0.0,
-                  left: 16.0,
-                  right: 16.0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        color: AppColor.textColor,
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 130.0, vertical: 10.0),
-                        height: 3.0,
-                      ),
-                      Text(
-                        'Name Your Lesson?',
-                        style: AppStyles.STYLE_14_BOLD
-                            .copyWith(color: AppColor.textColor),
-                      ),
-                      const SizedBox(height: 10.0),
-                      AppTextField(
-                        controller: nameLessonsController,
-                        labelText: "e.g., lesson ...",
-                        textInputAction: TextInputAction.next,
-                        validator: Validator.required,
-                      ),
-                      const SizedBox(height: 20.0),
-                      Text(
-                        'Description ?',
-                        style: AppStyles.STYLE_14_BOLD
-                            .copyWith(color: AppColor.textColor),
-                      ),
-                      const SizedBox(height: 10.0),
-                      buildTextFieldDes(describeController),
-                      const SizedBox(height: 20.0),
-                      Text(
-                        'Link Video?',
-                        style: AppStyles.STYLE_14_BOLD
-                            .copyWith(color: AppColor.textColor),
-                      ),
-                      const SizedBox(height: 10.0),
-                      AppTextField(
-                        controller: videoPathController,
-                        labelText: "e.g., path ...",
-                        textInputAction: TextInputAction.done,
-                        validator: Validator.required,
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  bottom: 20.0,
-                  left: 16.0,
-                  right: 16.0,
-                  child: AppElevatedButton.outline(
-                    text: 'Save',
-                    onPressed: () => Navigator.pop(context, true),
-                  ),
-                )
-              ],
-            ),
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0)
+                .copyWith(top: 30.0, bottom: 20.0),
+            children: [
+              Container(
+                color: AppColor.textColor,
+                margin: const EdgeInsets.symmetric(
+                    horizontal: 130.0, vertical: 10.0),
+                height: 3.0,
+              ),
+              Text(
+                'Name Your Lesson?',
+                style: AppStyles.STYLE_14_BOLD
+                    .copyWith(color: AppColor.textColor),
+              ),
+              const SizedBox(height: 10.0),
+              AppTextField(
+                controller: nameLessonsController,
+                labelText: "e.g., lesson ...",
+                textInputAction: TextInputAction.next,
+                validator: Validator.required,
+              ),
+              const SizedBox(height: 20.0),
+              Text(
+                'Description ?',
+                style: AppStyles.STYLE_14_BOLD
+                    .copyWith(color: AppColor.textColor),
+              ),
+              const SizedBox(height: 10.0),
+              buildTextFieldDes(describeController),
+              const SizedBox(height: 20.0),
+              Text(
+                'Link Video?',
+                style: AppStyles.STYLE_14_BOLD
+                    .copyWith(color: AppColor.textColor),
+              ),
+              const SizedBox(height: 10.0),
+              AppTextField(
+                controller: videoPathController,
+                labelText: "e.g., path ...",
+                textInputAction: TextInputAction.done,
+                validator: Validator.required,
+              ),
+              const SizedBox(height: 30.0),
+              AppElevatedButton.outline(
+                text: 'Save',
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           );
         }).then((value) {
       if (value ?? false) {

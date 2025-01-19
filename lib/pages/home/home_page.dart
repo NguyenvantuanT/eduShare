@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
   ];
 
   Future<void> getCourses() async {
-    courseServices.getCourses().then((values) {
+    courseServices.getListCourse().then((values) {
       courses = values;
       setState(() {});
     });
@@ -124,8 +124,7 @@ class _HomePageState extends State<HomePage> {
           GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 16.0,
-              crossAxisSpacing: 16.0,
+              crossAxisSpacing: 10.0,
               childAspectRatio: 2 / 3,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(

@@ -5,64 +5,81 @@ import 'package:chat_app/pages/course/edit_course_page.dart';
 import 'package:chat_app/pages/course/make_course_page.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/course_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class CoursePage extends StatefulWidget {
-  const CoursePage({super.key});
+class MyCoursePage extends StatefulWidget {
+  const MyCoursePage({super.key});
 
   @override
-  State<CoursePage> createState() => _CoursePageState();
+  State<MyCoursePage> createState() => _MyCoursePageState();
 }
 
-class _CoursePageState extends State<CoursePage> {
+class _MyCoursePageState extends State<MyCoursePage> {
   CourseServices courseServices = CourseServices();
   List<CourseModel> courses = [];
+  String email = SharedPrefs.user?.email ?? "";
 
-  Future<void> getCourses() async {
-    courseServices.getCourses().then((values) {
-      courses = values;
-      setState(() {});
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getCourses();
-  }
+  final Stream<QuerySnapshot> courseStream = FirebaseFirestore.instance
+      .collection('courses')
+      .orderBy('id', descending: true)
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
-          top: MediaQuery.of(context).padding.top + 10.0,
-        ),
-        children: [
-          Text(
-            'My Course',
-            style: AppStyles.STYLE_18_BOLD.copyWith(
-              color: AppColor.textColor,
-            ),
-          ),
-          const SizedBox(height: 15.0),
-          ListView.separated(
-            itemCount: courses.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (_, __) => const SizedBox(height: 15.0),
-            itemBuilder: (context, idx) => AppCourseCard(
-              courses[idx],
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => EditCoursePage(course: courses[idx]),
-              )),
-            ),
-          ),
-        ],
-      ),
+      body: StreamBuilder(
+          stream: courseStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Text('Something went wrong');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColor.blue),
+              );
+            }
+            
+            List<CourseModel> courses = (snapshot.data?.docs
+                .map((e) => CourseModel.fromJson((e.data() as Map<String, dynamic>))..docId = e.id)
+                .toList() ?? [] )
+                .where((e) => e.createBy == email)
+                .toList();
+
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
+                top: MediaQuery.of(context).padding.top + 10.0,
+              ),
+              children: [
+                Text(
+                  'My Course',
+                  style: AppStyles.STYLE_18_BOLD.copyWith(
+                    color: AppColor.textColor,
+                  ),
+                ),
+                const SizedBox(height: 15.0),
+                ListView.separated(
+                  itemCount: courses.length,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: const NeverScrollableScrollPhysics(),
+                  separatorBuilder: (_, __) => const SizedBox(height: 15.0),
+                  itemBuilder: (context, idx) => AppCourseCard(
+                    courses.reversed.toList()[idx],
+                    onPressed: () =>
+                        Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => EditCoursePage(
+                        courses[idx].docId ?? "",
+                      ),
+                    )),
+                  ),
+                ),
+              ],
+            );
+          }),
       floatingActionButton: FractionallySizedBox(
         widthFactor: 0.45,
         child: AppElevatedButton(

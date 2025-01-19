@@ -3,7 +3,7 @@ import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ImplCourseServices {
-  Future<List<CourseModel>> getCourses();
+  Future<List<CourseModel>> getListCourse();
   Future<CourseModel> getCourse(String docID);
   Future<CourseModel> createCourse(CourseModel course);
   Future<void> updateCourse(CourseModel course);
@@ -16,15 +16,19 @@ class CourseServices extends ImplCourseServices {
   String email = SharedPrefs.user?.email ?? '';
 
   @override
-  Future<List<CourseModel>> getCourses() async {
-    QuerySnapshot<Object?> data =
-        await courseCollection.orderBy('id', descending: false).get();
+  Future<List<CourseModel>> getListCourse() async {
+    try {
+      QuerySnapshot<Object?> data =
+          await courseCollection.orderBy('id', descending: false).get();
 
-    List<CourseModel> courses = data.docs
-        .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
-          ..docId = e.id)
-        .toList();
-    return courses;
+      List<CourseModel> courses = data.docs
+          .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
+            ..docId = e.id)
+          .toList();     
+      return courses;
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
   }
 
   @override
