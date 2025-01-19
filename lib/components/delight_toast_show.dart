@@ -8,8 +8,9 @@ class DelightToastShow {
   DelightToastShow._();
 
   static void showToast({
-    required BuildContext context,
-    required String text,
+    BuildContext? context,
+    String? text,
+    Color? color = AppColor.shadow,
     IconData icon = Icons.info,
   }) {
     DelightToastBar(
@@ -17,13 +18,13 @@ class DelightToastShow {
         position: DelightSnackbarPosition.top,
         builder: (context) {
           return ToastCard(
-            color: AppColor.shadow,
+            color:color,
             leading: Icon(icon, size: 28),
             title: Text(
-              text,
+              text ?? "",
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
             ),
           );
-        }).show(context);
+        }).show(context!);
   }
 }

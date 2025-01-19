@@ -45,12 +45,14 @@ class AppDialog {
                     action?.call();
                     Navigator.pop(context);
                   },
+                  height: 30,
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   text: 'Yes',
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0),
                   child: AppElevatedButton(
+                    height: 30,
                     onPressed: () => Navigator.pop(context),
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     text: 'No',
@@ -174,6 +176,4 @@ class AppDialog {
       }
     }
   }
-
-  
 }

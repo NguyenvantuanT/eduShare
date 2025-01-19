@@ -1,6 +1,6 @@
 import 'package:chat_app/components/app_tab_bar.dart';
-import 'package:chat_app/pages/auth/forgot_password_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
+import 'package:chat_app/pages/learning/learning_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
 import 'package:chat_app/pages/search/search_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -22,7 +22,7 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     SearchPage(),
-    ForgotPasswordPage(),
+    LearningPage(),
     ProfilePage(),
   ];
 

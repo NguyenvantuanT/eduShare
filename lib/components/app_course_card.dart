@@ -7,10 +7,12 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class AppCourseCard extends StatelessWidget {
-  const AppCourseCard(this.course, {super.key, this.onPressed});
+  const AppCourseCard(this.course,
+      {super.key, this.onRigthPressed, this.onLeftPressed});
 
   final CourseModel course;
-  final VoidCallback? onPressed;
+  final VoidCallback? onRigthPressed;
+  final VoidCallback? onLeftPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -92,13 +94,16 @@ class AppCourseCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                            child: AppElevatedButton.outline(
-                          text: 'View',
-                        )),
+                          child: AppElevatedButton.outline(
+                            text: 'Delete',
+                            onPressed: onLeftPressed,
+                          ),
+                        ),
+                        const SizedBox(width: 5.0),
                         Expanded(
                           child: AppElevatedButton.outline(
                             text: 'Edit',
-                            onPressed: onPressed,
+                            onPressed: onRigthPressed,
                           ),
                         ),
                       ],

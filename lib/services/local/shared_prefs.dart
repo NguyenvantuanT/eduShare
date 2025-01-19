@@ -6,11 +6,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefs {
   static const String checkAccess = 'checkAccess';
   static const String userKey = 'user';
+  static const String searchKey = 'search';
 
   static late SharedPreferences _prefs;
 
   static Future<void> initialise() async {
     _prefs = await SharedPreferences.getInstance();
+  }
+
+  static Future<String?> getSearchText() async {
+    return _prefs.getString(searchKey);
+  }
+
+  static Future<void> setSearchText(String searchText) async {
+    _prefs.setString(searchKey, searchText);
   }
 
 

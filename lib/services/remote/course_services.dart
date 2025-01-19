@@ -7,6 +7,9 @@ abstract class ImplCourseServices {
   Future<CourseModel> getCourse(String docID);
   Future<CourseModel> createCourse(CourseModel course);
   Future<void> updateCourse(CourseModel course);
+  Future<void> deleteCourse(String docID);
+  Future<List<CourseModel>?> getSearchs(String query);
+  Future<List<CourseModel>?> getLearnings(List<String> querys);
 }
 
 class CourseServices extends ImplCourseServices {
@@ -24,7 +27,44 @@ class CourseServices extends ImplCourseServices {
       List<CourseModel> courses = data.docs
           .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
             ..docId = e.id)
-          .toList();     
+          .toList();
+      return courses;
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
+  Future<List<CourseModel>?> getSearchs(String query) async {
+    try {
+      QuerySnapshot<Object?> data =
+          await courseCollection.orderBy('id', descending: false).get();
+
+      List<CourseModel> courses = data.docs
+          .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
+            ..docId = e.id)
+          .toList()
+          .where(
+              (e) => (e.name ?? "").toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      return courses;
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
+  Future<List<CourseModel>?> getLearnings(List<String> querys) async {
+    try {
+      QuerySnapshot<Object?> data =
+          await courseCollection.orderBy('id', descending: false).get();
+
+      List<CourseModel> courses = data.docs
+          .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
+            ..docId = e.id)
+          .toList()
+          .where((e) => querys.any((query) => (e.docId ?? "").contains(query)))
+          .toList();
       return courses;
     } on FirebaseException catch (e) {
       throw Exception(e.message);
@@ -50,5 +90,10 @@ class CourseServices extends ImplCourseServices {
     return CourseModel.fromJson(
       data.data() as Map<String, dynamic>,
     )..docId = data.id;
+  }
+
+  @override
+  Future<void> deleteCourse(String docID) async {
+    await courseCollection.doc(docID).delete();
   }
 }
