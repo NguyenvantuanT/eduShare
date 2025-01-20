@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  const MainPage({super.key, this.index});
+  
+  final int? index ;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -44,7 +46,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    selectedIndex = 0;
+    selectedIndex = widget.index ?? 0;
   }
 
   @override

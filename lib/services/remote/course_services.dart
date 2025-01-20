@@ -4,19 +4,19 @@ import 'package:chat_app/utils/enum.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ImplCourseServices {
-  Future<void> deleteCourse(String docID);
+  Future<List<CourseModel>> getAI();
+  Future<List<CourseModel>> getWeb();
+  Future<List<CourseModel>> getData();
+  Future<List<CourseModel>> getMobile();
+  Future<List<CourseModel>> getLearnings();
   Future<List<CourseModel>> getListCourse();
+  Future<dynamic> deleteCourse(String docID);
   Future<CourseModel> getCourse(String docID);
-  Future<void> updateCourse(CourseModel course);
+  Future<dynamic> updateCourse(CourseModel course);
   Future<List<CourseModel>?> getSearchs(String query);
   Future<CourseModel> createCourse(CourseModel course);
-  Future<void> toggleFavorite(CourseModel course, bool isFavorite);
-  Future<void> toggleLearning(CourseModel course, bool isLearning);
-  Future<List<CourseModel>> getLearnings();
-  Future<List<CourseModel>> getMobile();
-  Future<List<CourseModel>> getWeb();
-  Future<List<CourseModel>> getAI();
-  Future<List<CourseModel>> getData();
+  Future<dynamic> toggleFavorite(CourseModel course, bool isFavorite);
+  Future<dynamic> toggleLearning(CourseModel course, bool isLearning);
 }
 
 class CourseServices extends ImplCourseServices {
@@ -87,7 +87,7 @@ class CourseServices extends ImplCourseServices {
   }
 
   @override
-  Future<void> updateCourse(CourseModel course) async {
+  Future<dynamic> updateCourse(CourseModel course) async {
     await courseCollection.doc(course.docId).update(course.toJson());
   }
 
@@ -100,73 +100,69 @@ class CourseServices extends ImplCourseServices {
   }
 
   @override
-  Future<void> deleteCourse(String docID) async {
+  Future<dynamic> deleteCourse(String docID) async {
     await courseCollection.doc(docID).delete();
   }
 
   @override
-  Future<void> toggleFavorite(CourseModel course, bool isFavorite) async {
+  Future<dynamic> toggleFavorite(CourseModel course, bool isFavorite) async {
     DocumentReference<Object?> data = courseCollection.doc(course.docId);
     const favorites = 'favorites';
     if (isFavorite) {
       await data.update({
-        favorites: FieldValue.arrayUnion([SharedPrefs.user?.email])
+        favorites: FieldValue.arrayUnion([email])
       });
     } else {
       await data.update({
-        favorites: FieldValue.arrayRemove([SharedPrefs.user?.email])
+        favorites: FieldValue.arrayRemove([email])
       });
     }
   }
 
   @override
-  Future<void> toggleLearning(CourseModel course, bool isLearning) async {
+  Future<dynamic> toggleLearning(CourseModel course, bool isLearning) async {
     DocumentReference<Object?> data = courseCollection.doc(course.docId);
     const learnings = 'learnings';
     if (isLearning) {
       await data.update({
-        learnings: FieldValue.arrayUnion([SharedPrefs.user?.email])
+        learnings: FieldValue.arrayUnion([email])
       });
     } else {
       await data.update({
-        learnings: FieldValue.arrayRemove([SharedPrefs.user?.email])
+        learnings: FieldValue.arrayRemove([email])
       });
     }
   }
-  
+
   @override
   Future<List<CourseModel>> getAI() {
-    // TODO: implement getAI
     throw UnimplementedError();
   }
-  
+
   @override
   Future<List<CourseModel>> getData() {
-    // TODO: implement getData
     throw UnimplementedError();
   }
-  
+
   @override
   Future<List<CourseModel>> getMobile() async {
     try {
       QuerySnapshot<Object?> data =
           await courseCollection.orderBy('id', descending: false).get();
-
       List<CourseModel> courses = data.docs
           .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
             ..docId = e.id)
           .toList()
-          .where((e) => (e.category ?? '').contains('Moblie'))
+          .where((e) => (e.category ?? '').contains(CategoryType.Mobile.name))
           .toList();
       return courses;
-    } on FirebaseException catch (e) {
-      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Error fetching courses: ${e.toString()}');
     }
   }
-  
+
   @override
   Future<List<CourseModel>> getWeb() {
-    // TODO: implement getWeb
     throw UnimplementedError();
   }
 }

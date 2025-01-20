@@ -1,5 +1,6 @@
 import 'package:chat_app/components/debouncer.dart';
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/pages/search/widgets/create_course_item.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -29,7 +30,7 @@ class _SearchPageState extends State<SearchPage> {
     _getSearchText();
   }
 
-  void  _getSearchText() {
+  void _getSearchText() {
     SharedPrefs.getSearchText().then((value) {
       searchController.text = value ?? '';
       _searchCourse(value ?? '');
@@ -87,7 +88,14 @@ class _SearchPageState extends State<SearchPage> {
                   separatorBuilder: (_, __) => const SizedBox(),
                   itemBuilder: (context, idx) {
                     final course = searchList[idx];
-                    return CourseSearchItem(course);
+                    return CourseSearchItem(
+                      course,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                CourseDetailPage(course.docId ?? "")),
+                      ),
+                    );
                   },
                 )
         ],
