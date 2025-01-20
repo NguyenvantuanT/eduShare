@@ -1,4 +1,5 @@
 import 'package:chat_app/components/app_tab_bar.dart';
+import 'package:chat_app/pages/favorite/favorite_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/learning/learning_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
@@ -23,7 +24,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     SearchPage(),
     LearningPage(),
-    ProfilePage(),
+    FavoritePage(),
   ];
 
   List<String> lables = [

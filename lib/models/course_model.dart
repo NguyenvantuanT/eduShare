@@ -10,6 +10,8 @@ class CourseModel {
   String? createBy;
   String? progress;
   List<LessonModel>? lessons;
+  List<String>? favorites;
+  List<String>? learnings;
 
   CourseModel();
 
@@ -23,7 +25,11 @@ class CourseModel {
     ..progress = json['progress']
     ..lessons = (json['lessons'] as List<dynamic>)
         .map((lesson) => LessonModel.fromJson(lesson as Map<String, dynamic>))
-        .toList();
+        .toList()
+    ..learnings =
+        json['learnings'] != null ? List<String>.from(json['learnings']) : null
+    ..favorites =
+        json['favorites'] != null ? List<String>.from(json['favorites']) : null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -34,7 +40,9 @@ class CourseModel {
       'imageCourse': imageCourse,
       'createBy': createBy,
       'progress': progress,
-      'lessons': (lessons ?? []).map((lesson) => lesson.toJson())
+      'lessons': lessons?.map((lesson) => lesson.toJson()),
+      'learnings': learnings?.map((e) => e).toList(),
+      'favorites': favorites?.map((e) => e).toList(),
     };
   }
 }

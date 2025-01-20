@@ -12,6 +12,7 @@ class DelightToastShow {
     String? text,
     Color? color = AppColor.shadow,
     IconData icon = Icons.info,
+    Color? iconColor = AppColor.shadow,
   }) {
     DelightToastBar(
         autoDismiss: true,
@@ -19,7 +20,7 @@ class DelightToastShow {
         builder: (context) {
           return ToastCard(
             color:color,
-            leading: Icon(icon, size: 28),
+            leading: Icon(icon, size: 28, color: iconColor,),
             title: Text(
               text ?? "",
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),

@@ -6,14 +6,6 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-// ignore_for_file: constant_identifier_names
-
-enum Category {
-  Mobile,
-  Web,
-  AI,
-  Data,
-}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,7 +19,8 @@ class _HomePageState extends State<HomePage> {
   ScrollController scrollController = ScrollController();
   FocusNode messFocus = FocusNode();
   CourseServices courseServices = CourseServices();
-  List<CourseModel> courses = [];
+  List<CourseModel> coursesLearning = [];
+  List<CourseModel> coursesMoblie = [];
   int selectIndex = 0;
   bool isLoading = false;
 
@@ -38,18 +31,31 @@ class _HomePageState extends State<HomePage> {
     'Data Science and Analytics'
   ];
 
-  Future<void> getCourses() async {
+  void _getCourseLearning() async {
     setState(() => isLoading = true);
-    courseServices.getListCourse().then((values) {
-      courses = values;
+    await Future.delayed(const Duration(milliseconds: 1000));
+    courseServices.getLearnings().then((values) {
+      coursesLearning = values;
+      setState(() => isLoading = false);
+    }).catchError((onError) {
+      isLoading = false;
       setState(() {});
-    }).whenComplete(() => setState(() => isLoading = false));
+    });
+    ;
+  }
+
+  void _getCourseMoblie() {
+    courseServices.getMobile().then((values) {
+      coursesMoblie = values;
+      setState(() {});
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    getCourses();
+    _getCourseLearning();
+    _getCourseMoblie;
   }
 
   @override
@@ -73,12 +79,12 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 180.0,
                   child: ListView.separated(
-                    itemCount: courses.length,
+                    itemCount: coursesLearning.length,
                     padding: const EdgeInsets.only(left: 16.0),
                     scrollDirection: Axis.horizontal,
                     separatorBuilder: (_, __) => const SizedBox(width: 10.0),
                     itemBuilder: (_, idx) {
-                      final course = courses[idx];
+                      final course = coursesLearning[idx];
                       return LearCourseCard(
                         course,
                         onPressed: () => Navigator.of(context).push(
@@ -94,68 +100,104 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 20.0),
                 SizedBox(
                   height: 54.0,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(categorys.length, (idx) {
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5.0,
-                          ).copyWith(bottom: 6.0),
-                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                          decoration: BoxDecoration(
-                              color: AppColor.bgColor,
-                              border: Border(
-                                  bottom: BorderSide(
-                                      color: idx == selectIndex
-                                          ? AppColor.blue
-                                          : AppColor.bgColor,
-                                      width: 3.0))),
-                          child: GestureDetector(
-                            onTap: () => setState(() => selectIndex = idx),
-                            child: Text(
-                              categorys[idx],
-                              style: AppStyles.STYLE_14_BOLD.copyWith(
-                                  color: idx == selectIndex
-                                      ? AppColor.textColor
-                                      : AppColor.greyText),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
+                  child: _buildTabBar(),
                 ),
-                GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10.0,
-                    childAspectRatio: 2 / 3,
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
-                    top: 16.0,
-                    bottom: 20.0,
-                  ),
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) {
-                    final course = courses[index];
-                    return CourseCard(
-                      course,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CourseDetailPage(course.docId ?? ""),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                 _buildGridVIew(coursesMoblie),
+                // IndexedStack(
+                //   index: selectIndex,
+                //   children: [
+                //     _buildGridVIew(coursesMoblie),
+                //     RefreshIndicator(
+                //       onRefresh: () async {
+                //         _getCourseMoblie();
+                //       },
+                //       child: Center(
+                //         child: _buildGridVIew(coursesMoblie),
+                //       ),
+                //     ),
+                //     RefreshIndicator(
+                //       onRefresh: () async {
+                //         _getCourseMoblie();
+                //       },
+                //       child: Center(
+                //         child: _buildGridVIew(coursesMoblie),
+                //       ),
+                //     ),
+                //     RefreshIndicator(
+                //       onRefresh: () async {
+                //         _getCourseMoblie();
+                //       },
+                //       child: Center(
+                //         child: _buildGridVIew(coursesMoblie),
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ],
             ),
+    );
+  }
+
+  GridView _buildGridVIew(List<CourseModel> list) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10.0,
+        childAspectRatio: 2 / 3,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
+        top: 16.0,
+        bottom: 20.0,
+      ),
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final course = list[index];
+        return CourseCard(
+          course,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CourseDetailPage(course.docId ?? ""),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTabBar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(categorys.length, (idx) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 5.0,
+            ).copyWith(bottom: 6.0),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0),
+            decoration: BoxDecoration(
+                color: AppColor.bgColor,
+                border: Border(
+                    bottom: BorderSide(
+                        color: idx == selectIndex
+                            ? AppColor.blue
+                            : AppColor.bgColor,
+                        width: 3.0))),
+            child: GestureDetector(
+              onTap: () => setState(() => selectIndex = idx),
+              child: Text(
+                categorys[idx],
+                style: AppStyles.STYLE_14_BOLD.copyWith(
+                    color: idx == selectIndex
+                        ? AppColor.textColor
+                        : AppColor.greyText),
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 }

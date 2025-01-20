@@ -2,13 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
-import 'package:chat_app/services/remote/account_services.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,10 +24,10 @@ class CourseDetailPage extends StatefulWidget {
 class _CourseDetailPageState extends State<CourseDetailPage> {
   CourseModel course = CourseModel();
   CourseServices courseServices = CourseServices();
-  AccountServices accountServices = AccountServices();
-  List<String> favorites = [];
   bool isFavorite = false;
-  UserModel userModel = SharedPrefs.user ?? UserModel();
+  bool isLearning = false;
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -37,57 +35,46 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   void getCourse() {
-    courseServices.getCourse(widget.docId).then((value) {
-      course = value;
-      favorites = userModel.favorites ?? [];
-      isFavorite = favorites.any((e) => e == course.docId);
-      setState(() {});
-    });
+    setState(() => isLoading = true);
+    courseServices
+        .getCourse(widget.docId)
+        .then((value) {
+          course = value;
+          isFavorite =(course.favorites ?? []).any((e) => e == SharedPrefs.user?.email);
+          isLearning =(course.learnings ?? []).any((e) => e == SharedPrefs.user?.email);
+          setState(() {});
+        })
+        .catchError((onError) {})
+        .whenComplete(() => setState(() => isLoading = true));
   }
 
-  void addLearning(BuildContext context) {
-    UserModel body = (SharedPrefs.user ?? UserModel())
-      ..learnings = [course.docId ?? ""];
-    accountServices.updateProfile(body).then((_) {
-      SharedPrefs.user = body;
+  void toggleFavorite(BuildContext context) {
+    setState(() => isFavorite = !isFavorite);
+    courseServices.toggleFavorite(course, isFavorite).then((_) {
       if (!context.mounted) return;
       DelightToastShow.showToast(
           context: context,
-          text: 'Course has been add your learning 😍',
+          icon: Icons.favorite,
+          iconColor: isFavorite ? AppColor.blue : null,
+          text: 'Course has been ${isFavorite ? 'add' : 'remote'} your favorites 😍',
           color: AppColor.bgColor);
       setState(() {});
-    });
+    }).catchError((onError) {});
   }
 
-  void addFavorite(BuildContext context) {
-    UserModel body = (SharedPrefs.user ?? UserModel())
-      ..favorites = [...favorites, course.docId ?? ""];
-      debugPrint(body.toJson().toString());
-    accountServices.updateProfile(body).then((_) {
-      SharedPrefs.user = body;
-      isFavorite = (body.favorites ?? []).any((e) => e == course.docId);
+  void toggleLearning(BuildContext context) {
+    setState(() => isLearning = !isLearning);
+    courseServices.toggleLearning(course, isLearning).then((_) {
       if (!context.mounted) return;
       DelightToastShow.showToast(
           context: context,
-          text: 'Course has been add your favorites 😍',
+          icon: Icons.book,
+          iconColor: isLearning ? AppColor.blue : null,
+          text:'Course has been ${isLearning ? 'add' : 'remote'} your learning 😍',
           color: AppColor.bgColor);
       setState(() {});
-    });
-  }
 
-  void remoteFavorite(BuildContext context) async {
-    UserModel body = (SharedPrefs.user ?? UserModel())
-      ..favorites = favorites.where((e) => e != course.docId).toList();
-    accountServices.updateProfile(body).then((_) {
-      SharedPrefs.user = body;
-      isFavorite = (body.favorites ?? []).any((e) => e == course.docId);
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-          context: context,
-          text: 'Course has been remote your favorites 😍',
-          color: AppColor.bgColor);
-      setState(() {});
-    });
+    }).catchError((onError) {});
   }
 
   @override
@@ -194,7 +181,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => addLearning(context),
+                      onTap: () => toggleLearning(context),
                       child: Container(
                         height: 30.0,
                         margin: const EdgeInsets.symmetric(vertical: 15.0)
@@ -209,13 +196,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         ),
                         child: Text(
                           "Add to lear",
-                          style:
-                              AppStyles.STYLE_14.copyWith(color: AppColor.blue),
+                          style: AppStyles.STYLE_14.copyWith(
+                              color: isLearning
+                                  ? AppColor.blue
+                                  : AppColor.greyText),
                         ),
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => addFavorite(context),
+                      onTap: () => toggleFavorite(context),
                       child: isFavorite
                           ? const Icon(
                               Icons.favorite,

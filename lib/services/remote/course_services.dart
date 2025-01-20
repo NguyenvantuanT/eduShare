@@ -1,15 +1,22 @@
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
+import 'package:chat_app/utils/enum.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ImplCourseServices {
+  Future<void> deleteCourse(String docID);
   Future<List<CourseModel>> getListCourse();
   Future<CourseModel> getCourse(String docID);
-  Future<CourseModel> createCourse(CourseModel course);
   Future<void> updateCourse(CourseModel course);
-  Future<void> deleteCourse(String docID);
   Future<List<CourseModel>?> getSearchs(String query);
-  Future<List<CourseModel>?> getLearnings(List<String> querys);
+  Future<CourseModel> createCourse(CourseModel course);
+  Future<void> toggleFavorite(CourseModel course, bool isFavorite);
+  Future<void> toggleLearning(CourseModel course, bool isLearning);
+  Future<List<CourseModel>> getLearnings();
+  Future<List<CourseModel>> getMobile();
+  Future<List<CourseModel>> getWeb();
+  Future<List<CourseModel>> getAI();
+  Future<List<CourseModel>> getData();
 }
 
 class CourseServices extends ImplCourseServices {
@@ -54,7 +61,7 @@ class CourseServices extends ImplCourseServices {
   }
 
   @override
-  Future<List<CourseModel>?> getLearnings(List<String> querys) async {
+  Future<List<CourseModel>> getLearnings() async {
     try {
       QuerySnapshot<Object?> data =
           await courseCollection.orderBy('id', descending: false).get();
@@ -63,7 +70,7 @@ class CourseServices extends ImplCourseServices {
           .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
             ..docId = e.id)
           .toList()
-          .where((e) => querys.any((query) => (e.docId ?? "").contains(query)))
+          .where((e) => (e.learnings ?? []).contains(email))
           .toList();
       return courses;
     } on FirebaseException catch (e) {
@@ -95,5 +102,71 @@ class CourseServices extends ImplCourseServices {
   @override
   Future<void> deleteCourse(String docID) async {
     await courseCollection.doc(docID).delete();
+  }
+
+  @override
+  Future<void> toggleFavorite(CourseModel course, bool isFavorite) async {
+    DocumentReference<Object?> data = courseCollection.doc(course.docId);
+    const favorites = 'favorites';
+    if (isFavorite) {
+      await data.update({
+        favorites: FieldValue.arrayUnion([SharedPrefs.user?.email])
+      });
+    } else {
+      await data.update({
+        favorites: FieldValue.arrayRemove([SharedPrefs.user?.email])
+      });
+    }
+  }
+
+  @override
+  Future<void> toggleLearning(CourseModel course, bool isLearning) async {
+    DocumentReference<Object?> data = courseCollection.doc(course.docId);
+    const learnings = 'learnings';
+    if (isLearning) {
+      await data.update({
+        learnings: FieldValue.arrayUnion([SharedPrefs.user?.email])
+      });
+    } else {
+      await data.update({
+        learnings: FieldValue.arrayRemove([SharedPrefs.user?.email])
+      });
+    }
+  }
+  
+  @override
+  Future<List<CourseModel>> getAI() {
+    // TODO: implement getAI
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<List<CourseModel>> getData() {
+    // TODO: implement getData
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<List<CourseModel>> getMobile() async {
+    try {
+      QuerySnapshot<Object?> data =
+          await courseCollection.orderBy('id', descending: false).get();
+
+      List<CourseModel> courses = data.docs
+          .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
+            ..docId = e.id)
+          .toList()
+          .where((e) => (e.category ?? '').contains('Moblie'))
+          .toList();
+      return courses;
+    } on FirebaseException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+  
+  @override
+  Future<List<CourseModel>> getWeb() {
+    // TODO: implement getWeb
+    throw UnimplementedError();
   }
 }
