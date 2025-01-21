@@ -23,9 +23,12 @@ class CourseModel {
     ..imageCourse = json['imageCourse']
     ..createBy = json['createBy']
     ..progress = json['progress']
-    ..lessons = (json['lessons'] as List<dynamic>)
-        .map((lesson) => LessonModel.fromJson(lesson as Map<String, dynamic>))
-        .toList()
+    ..lessons = json['lessons'] != null
+        ? (json['lessons'] as List<dynamic>)
+            .map((lesson) =>
+                LessonModel.fromJson(lesson as Map<String, dynamic>))
+            .toList()
+        : null
     ..learnings =
         json['learnings'] != null ? List<String>.from(json['learnings']) : null
     ..favorites =

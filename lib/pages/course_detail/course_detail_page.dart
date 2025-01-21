@@ -13,9 +13,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:readmore/readmore.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  const CourseDetailPage(this.docId, {super.key});
+  const CourseDetailPage(this.docId, {super.key, this.onUpdate});
 
   final String docId;
+  final VoidCallback? onUpdate;
 
   @override
   State<CourseDetailPage> createState() => _CourseDetailPageState();
@@ -40,8 +41,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         .getCourse(widget.docId)
         .then((value) {
           course = value;
-          isFavorite =(course.favorites ?? []).any((e) => e == SharedPrefs.user?.email);
-          isLearning =(course.learnings ?? []).any((e) => e == SharedPrefs.user?.email);
+          isFavorite =
+              (course.favorites ?? []).any((e) => e == SharedPrefs.user?.email);
+          isLearning =
+              (course.learnings ?? []).any((e) => e == SharedPrefs.user?.email);
           setState(() {});
         })
         .catchError((onError) {})
@@ -56,26 +59,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           context: context,
           icon: Icons.favorite,
           iconColor: isFavorite ? AppColor.blue : null,
-          text: 'Course has been ${isFavorite ? 'add' : 'remote'} your favorites 😍',
+          text:
+              'Course has been ${isFavorite ? 'add' : 'remote'} your favorites 😍',
           color: AppColor.bgColor);
       setState(() {});
     }).catchError((onError) {});
   }
 
   void toggleLearning(BuildContext context) {
-    setState(() => isLearning = !isLearning);
-    courseServices.toggleLearning(course, isLearning).then((_) {
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-          context: context,
-          icon: Icons.book,
-          iconColor: isLearning ? AppColor.blue : null,
-          text:'Course has been ${isLearning ? 'add' : 'remote'} your learning 😍',
-          color: AppColor.bgColor);
-      setState(() {});
-
-    }).catchError((onError) {});
-  }
+  setState(() => isLearning = !isLearning);
+  courseServices.toggleLearning(course, isLearning).then((_) {
+    widget.onUpdate?.call();
+    if (!context.mounted) return;
+    DelightToastShow.showToast(
+      context: context,
+      icon: Icons.book,
+      iconColor: isLearning ? AppColor.blue : null,
+      text:
+          'Course has been ${isLearning ? 'added to' : 'removed from'} your learning 😍',
+      color: AppColor.bgColor,
+    );
+    setState(() {});
+  }).catchError((onError) {
+    print("Error: $onError");
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +104,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               ),
               Positioned(
                 child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => Navigator.pop(context, true),
                   behavior: HitTestBehavior.translucent,
                   child: const Padding(
                     padding: EdgeInsets.all(5.0),

@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/components/button/app_elevated_button.dart';
+import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -7,111 +7,131 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class AppCourseCard extends StatelessWidget {
-  const AppCourseCard(this.course,
-      {super.key, this.onRigthPressed, this.onLeftPressed});
+  const AppCourseCard(
+    this.course, {
+    super.key,
+    this.onDeletePressed,
+    this.onEditPressed,
+    this.onTap,
+    this.onFavorite,
+    this.onLearning,
+  });
 
   final CourseModel course;
-  final VoidCallback? onRigthPressed;
-  final VoidCallback? onLeftPressed;
+  final VoidCallback? onDeletePressed;
+  final VoidCallback? onEditPressed;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavorite;
+  final VoidCallback? onLearning;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColor.bgColor,
-      child: Row(
-        children: [
-          Expanded(
-              flex: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+            color: AppColor.white,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: AppShadow.boxShadowContainer),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(8.0),
                 child: CachedNetworkImage(
                   imageUrl: course.imageCourse ?? "",
+                  width: 100.0,
+                  height: 100.0,
                   fit: BoxFit.cover,
-                  width: 171.0,
-                  height: 162.0,
                   errorWidget: (context, __, ___) => const AppSimmer(
-                    width: 171.0,
-                    height: 162.0,
+                    height: 100.0,
+                    width: 100.0,
                   ),
-                  placeholder: (context, __) => const AppSimmer(
-                    width: 171.0,
-                    height: 162.0,
+                  placeholder: (_, __) => const AppSimmer(
+                    height: 100.0,
+                    width: 100.0,
                   ),
                 ),
-              )),
-          Expanded(
-              flex: 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      course.name ?? "",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(course.name ?? "",
                       style: AppStyles.STYLE_12.copyWith(
-                        color: AppColor.textColor,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "Review",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppStyles.STYLE_12.copyWith(
-                            color: AppColor.textColor.withOpacity(0.7),
+                          color: AppColor.textColor,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4.0),
+                  Text('${course.createBy} | ${course.category}',
+                      style: AppStyles.STYLE_10),
+                  const SizedBox(height: 12.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (onFavorite != null)
+                        GestureDetector(
+                          onTap: onFavorite,
+                          behavior: HitTestBehavior.translucent,
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.6),
+                            child: Icon(
+                              Icons.favorite,
+                              size: 20.0,
+                              color: AppColor.blue,
+                            ),
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          "100",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppStyles.STYLE_12.copyWith(
-                            color: AppColor.textColor.withOpacity(0.7),
+                      if (onDeletePressed != null)
+                        GestureDetector(
+                          onTap: onDeletePressed,
+                          behavior: HitTestBehavior.translucent,
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.6),
+                            child: Icon(
+                              Icons.delete,
+                              size: 20.0,
+                              color: AppColor.blue,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                    Container(
-                      height: 30.0,
-                      margin: const EdgeInsets.only(top: 10.0, bottom: 35.0),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 5.0),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: AppColor.blue),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(20.0))),
-                      child: Text(
-                        course.category ?? "",
-                        style: AppStyles.STYLE_12.copyWith(
-                          color: AppColor.blue,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppElevatedButton.outline(
-                            text: 'Delete',
-                            onPressed: onLeftPressed,
+                      const SizedBox(width: 10.0),
+                      if (onEditPressed != null)
+                        GestureDetector(
+                          onTap: onEditPressed,
+                          behavior: HitTestBehavior.translucent,
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.6),
+                            child: Icon(
+                              Icons.edit,
+                              size: 20.0,
+                              color: AppColor.blue,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 5.0),
-                        Expanded(
-                          child: AppElevatedButton.outline(
-                            text: 'Edit',
-                            onPressed: onRigthPressed,
+                      if (onLearning != null)
+                        GestureDetector(
+                          onTap: onLearning,
+                          behavior: HitTestBehavior.translucent,
+                          child: const Padding(
+                            padding: EdgeInsets.all(4.6),
+                            child: Icon(
+                              Icons.book,
+                              size: 20.0,
+                              color: AppColor.blue,
+                            ),
                           ),
                         ),
-                      ],
-                    )
-                  ],
-                ),
-              ))
-        ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

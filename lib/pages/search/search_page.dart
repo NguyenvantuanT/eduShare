@@ -70,6 +70,7 @@ class _SearchPageState extends State<SearchPage> {
                         onTap: () => searchFocus.requestFocus(),
                         child: SvgPicture.asset(
                           AppImages.iconSearch,
+                          color: AppColor.blue,
                           fit: BoxFit.cover,
                         )),
                     const SizedBox(height: 6.0),
@@ -132,6 +133,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             child: SvgPicture.asset(
               AppImages.iconSearch,
+              color: AppColor.blue,
               fit: BoxFit.contain,
             ),
           )),

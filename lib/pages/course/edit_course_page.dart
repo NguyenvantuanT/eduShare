@@ -14,6 +14,7 @@ import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -122,7 +123,8 @@ class _EditCoursePageState extends State<EditCoursePage> {
                 Positioned.fill(
                   child: ListView(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 10.0).copyWith(bottom: 90.0),
+                            horizontal: 16.0, vertical: 10.0)
+                        .copyWith(bottom: 90.0),
                     children: [
                       Text(
                         'Name Your Course?',
@@ -200,7 +202,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                                 ),
                               ),
                               const SizedBox(width: 10.0),
-                              LessonCard(lesson)
+                              Expanded(child: LessonCard(lesson))
                             ],
                           );
                         },

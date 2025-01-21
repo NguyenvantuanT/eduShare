@@ -53,6 +53,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
           : null;
 
     courseServices.createCourse(course).then((_) {
+      if(!context.mounted) return ;
       Navigator.of(context).pop;
     }).catchError((onError) {
       debugPrint("Failed to post: $onError");

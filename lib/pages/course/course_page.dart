@@ -31,7 +31,10 @@ class _MyCoursePageState extends State<MyCoursePage> {
   void deleteCourse(BuildContext context, String docId) {
     AppDialog.dialog(
       context,
-      title: const Icon(Icons.delete, color: AppColor.blue,),
+      title: const Icon(
+        Icons.delete,
+        color: AppColor.blue,
+      ),
       content: "Do you want delete this course ? 😢",
       action: () => courseServices.deleteCourse(docId),
     );
@@ -63,13 +66,12 @@ class _MyCoursePageState extends State<MyCoursePage> {
                 .toList();
 
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
-                top: MediaQuery.of(context).padding.top + 10.0,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0)
+                  .copyWith(bottom: 80.0),
               children: [
                 Text(
                   'My Course',
-                  style: AppStyles.STYLE_18_BOLD.copyWith(
+                  style: AppStyles.STYLE_14_BOLD.copyWith(
                     color: AppColor.textColor,
                   ),
                 ),
@@ -84,8 +86,10 @@ class _MyCoursePageState extends State<MyCoursePage> {
                       final course = courses.reversed.toList()[idx];
                       return AppCourseCard(
                         course,
-                        onLeftPressed: () => deleteCourse(context, course.docId ?? ""),
-                        onRigthPressed: () => Navigator.of(context).push( MaterialPageRoute(
+                        onDeletePressed: () =>
+                            deleteCourse(context, course.docId ?? ""),
+                        onEditPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
                             builder: (context) => EditCoursePage(
                               course.docId ?? "",
                             ),
