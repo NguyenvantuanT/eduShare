@@ -1,4 +1,5 @@
 class LessonModel {
+  String? lessonId;
   String? id;
   String? name;
   String? videoPath;

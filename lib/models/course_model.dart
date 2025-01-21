@@ -1,5 +1,3 @@
-import 'package:chat_app/models/lesson_model.dart';
-
 class CourseModel {
   String? docId;
   String? id;
@@ -9,9 +7,9 @@ class CourseModel {
   String? imageCourse;
   String? createBy;
   String? progress;
-  List<LessonModel>? lessons;
   List<String>? favorites;
   List<String>? learnings;
+  double? rating;
 
   CourseModel();
 
@@ -23,12 +21,7 @@ class CourseModel {
     ..imageCourse = json['imageCourse']
     ..createBy = json['createBy']
     ..progress = json['progress']
-    ..lessons = json['lessons'] != null
-        ? (json['lessons'] as List<dynamic>)
-            .map((lesson) =>
-                LessonModel.fromJson(lesson as Map<String, dynamic>))
-            .toList()
-        : null
+    ..rating = json['rating'] ?? 0.0
     ..learnings =
         json['learnings'] != null ? List<String>.from(json['learnings']) : null
     ..favorites =
@@ -43,7 +36,7 @@ class CourseModel {
       'imageCourse': imageCourse,
       'createBy': createBy,
       'progress': progress,
-      'lessons': lessons?.map((lesson) => lesson.toJson()),
+      'rating': rating,
       'learnings': learnings?.map((e) => e).toList(),
       'favorites': favorites?.map((e) => e).toList(),
     };

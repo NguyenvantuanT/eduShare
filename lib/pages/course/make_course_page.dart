@@ -1,15 +1,20 @@
 import 'dart:io';
 
+import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
+import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
+import 'package:chat_app/utils/enum.dart';
 import 'package:chat_app/utils/validator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,6 +36,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
   StorageServices storageServices = StorageServices();
   File? imageCourse;
   bool isLoading = false;
+  bool showMenu = false;
 
   Future<void> pickImageCourse() async {
     final XFile? file = await picker.pickImage(source: ImageSource.gallery);
@@ -53,8 +59,15 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
           : null;
 
     courseServices.createCourse(course).then((_) {
-      if(!context.mounted) return ;
-      Navigator.of(context).pop;
+      if (!context.mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => const MainPage(index: 4),
+        ),
+        (route) => false,
+      );
+      DelightToastShow.showToast(
+          context: context, text: 'Your course is create😐', icon: Icons.check);
     }).catchError((onError) {
       debugPrint("Failed to post: $onError");
     }).whenComplete(() => setState(() => isLoading = false));
@@ -121,11 +134,51 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                   ),
                   const SizedBox(height: 10.0),
                   AppTextField(
+                    readOnly: true,
+                    onTap: () => setState(() => showMenu = !showMenu),
                     controller: categoryController,
-                    labelText: "e.g., biology",
+                    hintText: "e.g., biology",
+                    hintTextColor: AppColor.textColor,
                     textInputAction: TextInputAction.next,
                     validator: Validator.required,
                   ),
+                  if (showMenu)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColor.bgColor,
+                        boxShadow: AppShadow.boxShadowContainer,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Column(
+                        children:
+                            List.generate(CategoryType.values.length, (idx) {
+                          final category = CategoryType.values[idx];
+                          return InkWell(
+                              onTap: () => setState(() {
+                                    categoryController.text = category.name;
+                                  }),
+                              child: Container(
+                                height: 30.0,
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color:
+                                        categoryController.text == category.name
+                                            ? AppColor.blue
+                                            : null),
+                                child: Text(
+                                  category.name,
+                                  style: AppStyles.STYLE_14.copyWith(
+                                      color: categoryController.text ==
+                                              category.name
+                                          ? AppColor.bgColor
+                                          : AppColor.textColor),
+                                ),
+                              ));
+                        }),
+                      ),
+                    ),
                   const SizedBox(height: 10.0),
                   Text(
                     'Description ?',
@@ -186,18 +239,14 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
               alignment: Alignment.topRight,
               padding: const EdgeInsets.all(4.0),
               decoration: BoxDecoration(
+                border: Border.all(color: AppColor.blue),
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(
                   image: imageCourse == null
-                      ? Image.asset(AppImages.imageDefault).image
+                      ? Image.asset(AppImages.imageLogoPng).image
                       : FileImage(imageCourse!),
                   fit: BoxFit.cover,
                 ),
-              ),
-              child: SvgPicture.asset(
-                AppImages.iconClosed,
-                height: 16.0,
-                width: 16.0,
               ),
             ),
             const SizedBox(width: 10.0),

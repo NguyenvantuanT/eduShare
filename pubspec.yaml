@@ -27,10 +27,15 @@ dependencies:
   youtube_player_flutter: ^9.1.1
   better_player: ^0.0.84
   readmore: ^3.0.0
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.17.0
+  date_picker_timeline: ^1.0.0
+  flutter_staggered_animations: ^1.0.0
+  
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/icon.jpg"
+  image_path: "assets/images/logo.png"
 
 dev_dependencies:
   flutter_test:

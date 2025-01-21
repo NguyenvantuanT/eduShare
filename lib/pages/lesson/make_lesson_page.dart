@@ -1,4 +1,4 @@
-
+import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/models/lesson_model.dart';
@@ -19,9 +19,9 @@ class MakeLessonPage extends StatelessWidget {
     final videoPathController = TextEditingController();
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      appBar: _buildAppBar(),
+      appBar: const AppTabBarBlue(title: 'Add Lesson'),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0 , vertical: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         children: [
           Text(
             'Name Your Lesson?',
@@ -53,6 +53,15 @@ class MakeLessonPage extends StatelessWidget {
             textInputAction: TextInputAction.done,
             validator: Validator.required,
           ),
+          const SizedBox(height: 10.0),
+           Text(
+            'Hãy đăng video lên youtube sau đó copy link và chỉ lấy đuôi ',
+            style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
+          ),
+          Text(
+            'ví dụ: https://youtu.be/hFtPNzP-6v8 lấy phần <hFtPNzP-6v8>',
+            style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
+          ),
           const SizedBox(height: 30.0),
           AppElevatedButton(
             text: 'Save',
@@ -67,17 +76,6 @@ class MakeLessonPage extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColor.blue,
-      scrolledUnderElevation: 0,
-      title: Text(
-        'Add Lesson',
-        style: AppStyles.STYLE_18_BOLD.copyWith(color: AppColor.white),
       ),
     );
   }

@@ -1,0 +1,3 @@
+class ForgotPasswordBody {
+  String? email;
+}

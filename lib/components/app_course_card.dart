@@ -28,6 +28,7 @@ class AppCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.translucent,
       child: Container(
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
