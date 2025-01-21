@@ -20,6 +20,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final messageController = TextEditingController();
+  late PageController pageController;
   ScrollController scrollController = ScrollController();
   FocusNode messFocus = FocusNode();
   CourseServices courseServices = CourseServices();
@@ -32,20 +33,23 @@ class _HomePageState extends State<HomePage> {
     'Mobile ',
     'Web ',
     'AI',
-    'Data Science and Analytics'
+    'Data',
+    'Eng',
+    'China',
   ];
 
   void _getCourseLearning() async {
     setState(() => isLoading = true);
     await Future.delayed(const Duration(milliseconds: 1000));
     courseServices.getLearnings().then((values) {
-      coursesLearning = values;
-      setState(() => isLoading = false);
+      setState(() {
+        coursesLearning = values;
+        isLoading = false;
+      });
     }).catchError((onError) {
       isLoading = false;
       setState(() {});
     });
-    ;
   }
 
   void _getCourseMoblie() {
@@ -54,10 +58,12 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
   }
+  
 
   @override
   void initState() {
     super.initState();
+    pageController = PageController();
     _getCourseLearning();
     _getCourseMoblie();
   }
@@ -70,87 +76,113 @@ class _HomePageState extends State<HomePage> {
           ? const Center(
               child: CircularProgressIndicator(color: AppColor.blue),
             )
-          : ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-                  child: Text(
-                    'Recent learning',
-                    style: AppStyles.STYLE_14_BOLD
-                        .copyWith(color: AppColor.textColor),
-                  ),
-                ),
-                coursesLearning.isEmpty
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: _noLearning(context),
-                      )
-                    : SizedBox(
-                        height: 180.0,
-                        child: ListView.separated(
-                          itemCount: coursesLearning.length,
-                          padding: const EdgeInsets.only(left: 16.0),
-                          scrollDirection: Axis.horizontal,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 10.0),
-                          itemBuilder: (_, idx) {
-                            final course = coursesLearning[idx];
-                            return LearCourseCard(
-                              course,
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CourseDetailPage(course.docId ?? ""),
+          : NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                          child: Text(
+                            'Recent learning',
+                            style: AppStyles.STYLE_14_BOLD
+                                .copyWith(color: AppColor.textColor),
+                          ),
+                        ),
+                        coursesLearning.isEmpty
+                            ? Align(
+                                alignment: Alignment.centerLeft,
+                                child: _noLearning(context),
+                              )
+                            : SizedBox(
+                                height: 180.0,
+                                child: ListView.separated(
+                                  itemCount: coursesLearning.length,
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  scrollDirection: Axis.horizontal,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 10.0),
+                                  itemBuilder: (_, idx) {
+                                    final course = coursesLearning[idx];
+                                    return LearCourseCard(
+                                      course,
+                                      onPressed: () => _navigatorDetailCourse(
+                                          context, course.docId ?? ''),
+                                    );
+                                  },
                                 ),
                               ),
-                            );
-                          },
+                        const SizedBox(height: 10.0),
+                        SizedBox(
+                          height: 54.0,
+                          child: _buildTabBar(),
                         ),
-                      ),
-                const SizedBox(height: 20.0),
-                SizedBox(
-                  height: 54.0,
-                  child: _buildTabBar(),
-                ),
-                IndexedStack(
-                  index: selectIndex,
-                  children: [
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        _getCourseMoblie();
-                      },
-                      child: Center(
-                        child: _buildGridVIew(coursesMoblie),
-                      ),
+                      ],
                     ),
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        _getCourseMoblie();
+                  )
+                ];
+              },
+              body: Column(
+                children: [
+                  Expanded(
+                    child: PageView(
+                      controller: pageController,
+                      onPageChanged: (int index) {
+                        setState(() => selectIndex = index);
                       },
-                      child: Center(
-                        child: _buildGridVIew(coursesLearning),
-                      ),
+                      children: [
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseMoblie();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesMoblie),
+                          ),
+                        ),
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseMoblie();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesMoblie),
+                          ),
+                        ),
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseMoblie();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesMoblie),
+                          ),
+                        ),
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseMoblie();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesMoblie),
+                          ),
+                        ),
+                      ],
                     ),
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        _getCourseMoblie();
-                      },
-                      child: Center(
-                        child: _buildGridVIew(coursesMoblie),
-                      ),
-                    ),
-                    RefreshIndicator(
-                      onRefresh: () async {
-                        _getCourseMoblie();
-                      },
-                      child: Center(
-                        child: _buildGridVIew(coursesLearning),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
+    );
+  }
+
+  void _navigatorDetailCourse(BuildContext context, String? docId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CourseDetailPage(
+          docId ?? "",
+          onUpdate: _getCourseLearning,
+        ),
+      ),
     );
   }
 
@@ -205,14 +237,9 @@ class _HomePageState extends State<HomePage> {
       itemCount: list.length,
       itemBuilder: (context, index) {
         final course = list[index];
-        return CourseCard(
-          course,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CourseDetailPage(course.docId ?? ""),
-            ),
-          ),
-        );
+        return CourseCard(course,
+            onPressed: () =>
+                _navigatorDetailCourse(context, course.docId ?? ''));
       },
     );
   }
@@ -237,7 +264,10 @@ class _HomePageState extends State<HomePage> {
                             : AppColor.bgColor,
                         width: 3.0))),
             child: GestureDetector(
-              onTap: () => setState(() => selectIndex = idx),
+              onTap: () {
+                selectIndex = idx;
+                pageController.jumpToPage(selectIndex);
+              },
               child: Text(
                 categorys[idx],
                 style: AppStyles.STYLE_14_BOLD.copyWith(

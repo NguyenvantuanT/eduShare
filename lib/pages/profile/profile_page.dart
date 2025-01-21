@@ -7,7 +7,6 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/auth/change_password_page.dart';
-import 'package:chat_app/pages/course/course_page.dart';
 import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/pages/profile/widgets/information_card.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -136,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   infor: 'Tab to get your courses',
                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const MyCoursePage())),
+                      builder: (context) => const MainPage(index: 4,))),
                 ),
                 const SizedBox(height: 20.0),
                 InformationCard(

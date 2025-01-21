@@ -1,6 +1,6 @@
+import 'package:chat_app/components/app_course_card.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
-import 'package:chat_app/pages/learning/widget/learning_item.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -81,8 +81,9 @@ class _LearningPageState extends State<LearningPage> {
                             const SizedBox(height: 20.0),
                         itemBuilder: (context, idx) {
                           final course = learningList[idx];
-                          return LearningItem(
+                          return AppCourseCard(
                             course,
+                            onLearning: (){},
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) =>

@@ -166,6 +166,7 @@ class AppDialog {
     if (status == true) {
       FirebaseAuth.instance.signOut();
       SharedPrefs.removeSeason();
+      SharedPrefs.setSearchText("");
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(

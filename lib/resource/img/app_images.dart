@@ -25,6 +25,7 @@ class AppImages {
   static const iconCamera= '${assetsIcon}ic_camera.svg';
   static const iconClosed= '${assetsIcon}ic_closed.svg';
   static const iconFavorite= '${assetsIcon}ic_favorite.svg';
+  static const iconBook= '${assetsIcon}ic_book.svg';
   static const icArrowRightBig= '${assetsIcon}ic_arrow_right_big.svg';
 
 

@@ -1,4 +1,5 @@
 import 'package:chat_app/components/app_tab_bar.dart';
+import 'package:chat_app/pages/course/course_page.dart';
 import 'package:chat_app/pages/favorite/favorite_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/learning/learning_page.dart';
@@ -27,6 +28,7 @@ class _MainPageState extends State<MainPage> {
     SearchPage(),
     LearningPage(),
     FavoritePage(),
+    MyCoursePage(),
   ];
 
   List<String> lables = [
@@ -34,6 +36,7 @@ class _MainPageState extends State<MainPage> {
     'Search',
     'Learning',
     'Favorite',
+    'Course',
   ];
 
   List<String> icons = [
@@ -41,6 +44,7 @@ class _MainPageState extends State<MainPage> {
     AppImages.iconSearch,
     AppImages.iconBriefCase,
     AppImages.iconFavorite,
+    AppImages.iconBook,
   ];
 
   @override
@@ -77,7 +81,7 @@ class _MainPageState extends State<MainPage> {
       ),
       child: Row(
         children: List.generate(
-          4,
+          lables.length,
           (index) => Expanded(child: _navigationItem(index)),
         ),
       ),
