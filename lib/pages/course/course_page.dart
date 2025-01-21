@@ -4,12 +4,15 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/course/edit_course_page.dart';
 import 'package:chat_app/pages/course/make_course_page.dart';
+import 'package:chat_app/pages/course_detail/course_detail_page.dart';
+import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class MyCoursePage extends StatefulWidget {
   const MyCoursePage({super.key});
@@ -76,27 +79,48 @@ class _MyCoursePageState extends State<MyCoursePage> {
                   ),
                 ),
                 const SizedBox(height: 15.0),
-                ListView.separated(
-                    itemCount: courses.length,
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (_, __) => const SizedBox(height: 15.0),
-                    itemBuilder: (context, idx) {
-                      final course = courses.reversed.toList()[idx];
-                      return AppCourseCard(
-                        course,
-                        onDeletePressed: () =>
-                            deleteCourse(context, course.docId ?? ""),
-                        onEditPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => EditCoursePage(
-                              course.docId ?? "",
-                            ),
+                courses.isEmpty
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 100.0),
+                          SvgPicture.asset(
+                            AppImages.imageOnBoarding3,
+                            height: 200.0,
+                            width: 200.0,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                      );
-                    }),
+                        ],
+                      )
+                    : ListView.separated(
+                        itemCount: courses.length,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 15.0),
+                        itemBuilder: (context, idx) {
+                          final course = courses[idx];
+                          return AppCourseCard(
+                            course,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CourseDetailPage(
+                                  course.docId ?? "",
+                                ),
+                              ),
+                            ),
+                            onDeletePressed: () =>
+                                deleteCourse(context, course.docId ?? ""),
+                            onEditPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => EditCoursePage(
+                                  course.docId ?? "",
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
               ],
             );
           }),

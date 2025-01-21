@@ -1,14 +1,21 @@
+import 'package:chat_app/components/app_search_box.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/course_model.dart';
+import 'package:chat_app/models/todo_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/course_card.dart';
+import 'package:chat_app/pages/home/widgets/todo_item.dart';
 import 'package:chat_app/pages/main_page.dart';
+import 'package:chat_app/pages/search/search_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
+import 'package:chat_app/services/remote/todo_services.dart';
+import 'package:chat_app/utils/enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,23 +27,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final messageController = TextEditingController();
-  late PageController pageController;
+  PageController pageController = PageController();
   ScrollController scrollController = ScrollController();
   FocusNode messFocus = FocusNode();
   CourseServices courseServices = CourseServices();
+  TodoServices todoServices = TodoServices();
   List<CourseModel> coursesLearning = [];
   List<CourseModel> coursesMoblie = [];
+  List<CourseModel> coursesWeb = [];
+  List<CourseModel> coursesAI = [];
+  List<CourseModel> coursesData = [];
+  List<CourseModel> coursesDesign = [];
+  List<CourseModel> coursesLanguage = [];
+  List<TodoModel> todos = [];
   int selectIndex = 0;
   bool isLoading = false;
-
-  List<String> categorys = [
-    'Mobile ',
-    'Web ',
-    'AI',
-    'Data',
-    'Eng',
-    'China',
-  ];
 
   void _getCourseLearning() async {
     setState(() => isLoading = true);
@@ -53,19 +58,65 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _getCourseMoblie() {
-    courseServices.getMobile().then((values) {
+    courseServices.getCourseByCategory(CategoryType.Mobile).then((values) {
       coursesMoblie = values;
       setState(() {});
     });
   }
-  
+
+  void _getCourseWeb() {
+    courseServices.getCourseByCategory(CategoryType.Web).then((values) {
+      coursesWeb = values;
+      setState(() {});
+    });
+  }
+
+  void _getCourseAI() {
+    courseServices.getCourseByCategory(CategoryType.AI).then((values) {
+      coursesAI = values;
+      setState(() {});
+    });
+  }
+
+  void _getCourseData() {
+    courseServices.getCourseByCategory(CategoryType.Data).then((values) {
+      coursesData = values;
+      setState(() {});
+    });
+  }
+
+  void _getCourseDesign() {
+    courseServices.getCourseByCategory(CategoryType.Design).then((values) {
+      coursesDesign = values;
+      setState(() {});
+    });
+  }
+
+  void _getCourseLanguage() {
+    courseServices.getCourseByCategory(CategoryType.Language).then((values) {
+      coursesLanguage = values;
+      setState(() {});
+    });
+  }
+
+  void getTodos() {
+    todoServices.getTodos().then((values) {
+      todos = values ?? [];
+      setState(() {});
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    pageController = PageController();
+    getTodos();
     _getCourseLearning();
     _getCourseMoblie();
+    _getCourseWeb();
+    _getCourseAI();
+    _getCourseData();
+    _getCourseDesign();
+    _getCourseLanguage();
   }
 
   @override
@@ -84,6 +135,72 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0)
+                              .copyWith(bottom: 10.0),
+                          child: AppSearchBox(
+                            readOnly: true,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => SearchPage(
+                                  onUpdate: _getCourseLearning,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                          child: Text(
+                            'Todo Task',
+                            style: AppStyles.STYLE_14_BOLD
+                                .copyWith(color: AppColor.textColor),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 120.0,
+                          child: todos.isEmpty
+                              ? Padding(
+                                 padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0)
+                                      .copyWith(bottom: 20.0),
+                                child: TodoItem(
+                                    TodoModel()
+                                      ..color = 0
+                                      ..title = "Make your Todo"
+                                      ..note = "Tap to create",
+                                    onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const MainPage(index: 1))),
+                                  ),
+                              )
+                              : ListView.separated(
+                                  itemCount: todos.length,
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0)
+                                      .copyWith(bottom: 20.0),
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 8.0),
+                                  itemBuilder: (context, idx) {
+                                    final todo = todos[idx];
+                                    return AnimationConfiguration.staggeredList(
+                                      position: idx,
+                                      child: SlideAnimation(
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        horizontalOffset: 200.0,
+                                        child: FadeInAnimation(
+                                            child: TodoItem(
+                                          todo,
+                                        )),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                        Padding(
                           padding:
                               const EdgeInsets.only(left: 16.0, bottom: 10.0),
                           child: Text(
@@ -98,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                                 child: _noLearning(context),
                               )
                             : SizedBox(
-                                height: 180.0,
+                                height: 130.0,
                                 child: ListView.separated(
                                   itemCount: coursesLearning.length,
                                   padding: const EdgeInsets.only(left: 16.0),
@@ -144,26 +261,42 @@ class _HomePageState extends State<HomePage> {
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseMoblie();
+                            _getCourseWeb();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesMoblie),
+                            child: _buildGridVIew(coursesWeb),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseMoblie();
+                            _getCourseAI();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesMoblie),
+                            child: _buildGridVIew(coursesAI),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseMoblie();
+                            _getCourseData();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesMoblie),
+                            child: _buildGridVIew(coursesData),
+                          ),
+                        ),
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseDesign();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesDesign),
+                          ),
+                        ),
+                        RefreshIndicator(
+                          onRefresh: () async {
+                            _getCourseLanguage();
+                          },
+                          child: Center(
+                            child: _buildGridVIew(coursesLanguage),
                           ),
                         ),
                       ],
@@ -180,7 +313,10 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(
         builder: (context) => CourseDetailPage(
           docId ?? "",
-          onUpdate: _getCourseLearning,
+          onUpdate: () {
+            _getCourseLearning();
+            _getCourseMoblie();
+          },
         ),
       ),
     );
@@ -196,9 +332,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       child: Container(
-        height: 150.0,
+        height: 120.0,
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 5.0).copyWith(bottom : 5.0),
         decoration: BoxDecoration(
             color: AppColor.blue,
             borderRadius: BorderRadius.circular(8.0),
@@ -207,14 +343,15 @@ class _HomePageState extends State<HomePage> {
           children: [
             SvgPicture.asset(
               AppImages.imageOnBoarding1,
-              height: 100.0,
-              width: 100.0,
+              height: 90.0,
+              width: 90.0,
               fit: BoxFit.cover,
             ),
             Text(
               "Find course you want 😘",
               style: AppStyles.STYLE_14.copyWith(color: AppColor.white),
             ),
+            
           ],
         ),
       ),
@@ -248,7 +385,7 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: List.generate(categorys.length, (idx) {
+        children: List.generate(CategoryType.values.length, (idx) {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(
@@ -269,7 +406,7 @@ class _HomePageState extends State<HomePage> {
                 pageController.jumpToPage(selectIndex);
               },
               child: Text(
-                categorys[idx],
+                CategoryType.values[idx].name,
                 style: AppStyles.STYLE_14_BOLD.copyWith(
                     color: idx == selectIndex
                         ? AppColor.textColor

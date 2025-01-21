@@ -6,8 +6,9 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 
 class CourseCard extends StatelessWidget {
-  const CourseCard(this.course, {super.key, this.onPressed});
+  const CourseCard(this.course, {super.key, this.onPressed, this.idx = 0});
   final CourseModel course;
+  final int idx;
   final Function()? onPressed;
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,8 @@ class CourseCard extends StatelessWidget {
           ),
           // Content padding
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -52,10 +54,12 @@ class CourseCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text(
-                      '${course.lessons?.length} Lessons',
-                      style:
-                          AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
+                    Text("${course.rating}"),
+                    const SizedBox(width: 2.0),
+                    const Icon(
+                      Icons.star,
+                      color: AppColor.orange,
+                      size: 20.0,
                     ),
                     const Spacer(),
                     Icon(

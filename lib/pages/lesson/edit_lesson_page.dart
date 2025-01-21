@@ -7,19 +7,34 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 
-class MakeLessonPage extends StatelessWidget {
-  const MakeLessonPage({super.key, this.onTap});
+class EditLessonPage extends StatefulWidget {
+  const EditLessonPage(this.lessonModel, {super.key, this.onEdit});
 
-  final Function(LessonModel)? onTap;
+  final Function(LessonModel)? onEdit;
+  final LessonModel lessonModel;
+
+  @override
+  State<EditLessonPage> createState() => _EditLessonPageState();
+}
+
+class _EditLessonPageState extends State<EditLessonPage> {
+  final nameLessonsController = TextEditingController();
+  final describeController = TextEditingController();
+  final videoPathController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    nameLessonsController.text = widget.lessonModel.name ?? "";
+    describeController.text = widget.lessonModel.description ?? "";
+    videoPathController.text = widget.lessonModel.videoPath ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {
-    final nameLessonsController = TextEditingController();
-    final describeController = TextEditingController();
-    final videoPathController = TextEditingController();
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      appBar: const AppTabBarBlue(title: 'Add Lesson'),
+      appBar: const AppTabBarBlue(title: 'Edit Lesson'),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         children: [
@@ -53,25 +68,15 @@ class MakeLessonPage extends StatelessWidget {
             textInputAction: TextInputAction.done,
             validator: Validator.required,
           ),
-          const SizedBox(height: 10.0),
-           Text(
-            'Hãy đăng video lên youtube sau đó copy link và chỉ lấy đuôi ',
-            style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
-          ),
-          Text(
-            'ví dụ: https://youtu.be/hFtPNzP-6v8 lấy phần <hFtPNzP-6v8>',
-            style: AppStyles.STYLE_12.copyWith(color: AppColor.greyText),
-          ),
           const SizedBox(height: 30.0),
           AppElevatedButton(
             text: 'Save',
             onPressed: () {
-              LessonModel lesson = LessonModel()
-                ..id = '${DateTime.now().millisecondsSinceEpoch}'
+              widget.lessonModel
                 ..name = nameLessonsController.text.trim()
                 ..description = describeController.text.trim()
                 ..videoPath = videoPathController.text.trim();
-              onTap?.call(lesson);
+              widget.onEdit?.call(widget.lessonModel);
               Navigator.pop(context);
             },
           ),

@@ -1,10 +1,10 @@
-import 'package:chat_app/components/app_tab_bar.dart';
+import 'package:chat_app/components/app_bar/app_tab_bar.dart';
 import 'package:chat_app/pages/course/course_page.dart';
 import 'package:chat_app/pages/favorite/favorite_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/learning/learning_page.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
-import 'package:chat_app/pages/search/search_page.dart';
+import 'package:chat_app/pages/todo/todo_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -13,8 +13,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key, this.index});
-  
-  final int? index ;
+
+  final int? index;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -25,7 +25,7 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> pages = const [
     HomePage(),
-    SearchPage(),
+    TodoPage(),
     LearningPage(),
     FavoritePage(),
     MyCoursePage(),
@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
 
   List<String> lables = [
     'Home',
-    'Search',
+    'Todo',
     'Learning',
     'Favorite',
     'Course',
@@ -41,7 +41,7 @@ class _MainPageState extends State<MainPage> {
 
   List<String> icons = [
     AppImages.iconHome,
-    AppImages.iconSearch,
+    AppImages.iconTodo,
     AppImages.iconBriefCase,
     AppImages.iconFavorite,
     AppImages.iconBook,

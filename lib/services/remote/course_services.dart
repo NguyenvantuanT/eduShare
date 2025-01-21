@@ -4,14 +4,11 @@ import 'package:chat_app/utils/enum.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ImplCourseServices {
-  Future<List<CourseModel>> getAI();
-  Future<List<CourseModel>> getWeb();
-  Future<List<CourseModel>> getData();
-  Future<List<CourseModel>> getMobile();
+  Future<List<CourseModel>> getCourseByCategory(CategoryType category);
   Future<List<CourseModel>> getLearnings();
   Future<List<CourseModel>> getListCourse();
-  Future<dynamic> deleteCourse(String docID);
-  Future<CourseModel> getCourse(String docID);
+  Future<dynamic> deleteCourse(String docId);
+  Future<CourseModel> getCourse(String docId);
   Future<dynamic> updateCourse(CourseModel course);
   Future<List<CourseModel>?> getSearchs(String query);
   Future<CourseModel> createCourse(CourseModel course);
@@ -22,7 +19,7 @@ abstract class ImplCourseServices {
 class CourseServices extends ImplCourseServices {
   CollectionReference courseCollection =
       FirebaseFirestore.instance.collection('courses');
-
+  final lessons = 'lessons';
   String email = SharedPrefs.user?.email ?? '';
 
   @override
@@ -92,16 +89,16 @@ class CourseServices extends ImplCourseServices {
   }
 
   @override
-  Future<CourseModel> getCourse(String docID) async {
-    DocumentSnapshot<Object?> data = await courseCollection.doc(docID).get();
+  Future<CourseModel> getCourse(String docId) async {
+    DocumentSnapshot<Object?> data = await courseCollection.doc(docId).get();
     return CourseModel.fromJson(
       data.data() as Map<String, dynamic>,
     )..docId = data.id;
   }
 
   @override
-  Future<dynamic> deleteCourse(String docID) async {
-    await courseCollection.doc(docID).delete();
+  Future<dynamic> deleteCourse(String docId) async {
+    await courseCollection.doc(docId).delete();
   }
 
   @override
@@ -135,17 +132,7 @@ class CourseServices extends ImplCourseServices {
   }
 
   @override
-  Future<List<CourseModel>> getAI() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<CourseModel>> getData() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<CourseModel>> getMobile() async {
+  Future<List<CourseModel>> getCourseByCategory(CategoryType category) async {
     try {
       QuerySnapshot<Object?> data =
           await courseCollection.orderBy('id', descending: false).get();
@@ -153,16 +140,11 @@ class CourseServices extends ImplCourseServices {
           .map((e) => CourseModel.fromJson(e.data() as Map<String, dynamic>)
             ..docId = e.id)
           .toList()
-          .where((e) => (e.category ?? '').contains(CategoryType.Mobile.name))
+          .where((e) => (e.category ?? '').contains(category.name))
           .toList();
       return courses;
     } catch (e) {
       throw Exception('Error fetching courses: ${e.toString()}');
     }
-  }
-
-  @override
-  Future<List<CourseModel>> getWeb() {
-    throw UnimplementedError();
   }
 }

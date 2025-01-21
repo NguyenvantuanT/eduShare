@@ -1,6 +1,9 @@
+import 'package:chat_app/components/app_bar/app_tab_bar.dart';
+import 'package:chat_app/components/app_search_box.dart';
 import 'package:chat_app/components/debouncer.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
+import 'package:chat_app/pages/profile/profile_page.dart';
 import 'package:chat_app/pages/search/widgets/create_course_item.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -11,7 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({super.key, this.onUpdate});
+
+  final Function()? onUpdate;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -55,12 +60,26 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
+      appBar: AppTabBar(
+        rightPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const ProfilePage()),
+        ),
+        title: 'What do you want to learn today?',
+        avatar: SharedPrefs.user?.avatar ?? '',
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           SizedBox(
             height: 51.0,
-            child: _buildSearchBox(),
+            child: AppSearchBox(
+              onChanged: (value) {
+                _searchCourse(value);
+                SharedPrefs.setSearchText(value);
+              },
+              searchController: searchController,
+              searchFocus: searchFocus,
+            ),
           ),
           searchList.isEmpty
               ? Column(
@@ -93,50 +112,16 @@ class _SearchPageState extends State<SearchPage> {
                       course,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) =>
-                                CourseDetailPage(course.docId ?? "")),
+                            builder: (context) => CourseDetailPage(
+                                  course.docId ?? "",
+                                  onUpdate: () => widget.onUpdate?.call(),
+                                )),
                       ),
                     );
                   },
                 )
         ],
       ),
-    );
-  }
-
-  TextField _buildSearchBox() {
-    OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(30.0)),
-          borderSide: BorderSide(color: color),
-        );
-
-    return TextField(
-      controller: searchController,
-      onChanged: (value) {
-        _searchCourse(value);
-        SharedPrefs.setSearchText(value);
-      },
-      style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
-      focusNode: searchFocus,
-      decoration: InputDecoration(
-          hintText: "Search your course",
-          hintStyle: AppStyles.STYLE_14.copyWith(color: AppColor.greyText),
-          border: outlineInputBorder(AppColor.greyText),
-          focusedBorder: outlineInputBorder(AppColor.greyText),
-          enabledBorder: outlineInputBorder(AppColor.greyText),
-          contentPadding: const EdgeInsets.only(top: 14.0),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(
-              left: 17.0,
-              top: 14.0,
-              bottom: 13.0,
-            ),
-            child: SvgPicture.asset(
-              AppImages.iconSearch,
-              color: AppColor.blue,
-              fit: BoxFit.contain,
-            ),
-          )),
     );
   }
 }

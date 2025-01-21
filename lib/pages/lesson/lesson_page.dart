@@ -38,7 +38,7 @@ class _LessonPageState extends State<LessonPage> {
   }
 
   void getVideo() {
-    lessonServices.getVideos(widget.docIdCourse).then((values) {
+    lessonServices.getLessons(widget.docIdCourse).then((values) {
       lessons = values;
       lesson = lessons[lessonIndex];
       controller = YoutubePlayerController(
@@ -49,7 +49,6 @@ class _LessonPageState extends State<LessonPage> {
     }).catchError((onError) {
       debugPrint('object $onError');
     });
-    ;
   }
 
   @override

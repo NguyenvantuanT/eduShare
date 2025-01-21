@@ -5,6 +5,7 @@ class AppImages {
   static const assetsImage = 'assets/images/';
 
   static const imageLogo = '${assetsImage}logo.svg';
+  static const imageLogoPng = '${assetsImage}logo.png';
   static const imageOnBoarding1 = '${assetsImage}on_boarding_1.svg';
   static const imageOnBoarding2 = '${assetsImage}on_boarding_2.svg';
   static const imageOnBoarding3 = '${assetsImage}on_boarding_3.svg';
@@ -26,6 +27,7 @@ class AppImages {
   static const iconClosed= '${assetsIcon}ic_closed.svg';
   static const iconFavorite= '${assetsIcon}ic_favorite.svg';
   static const iconBook= '${assetsIcon}ic_book.svg';
+  static const iconTodo= '${assetsIcon}ic_todo.svg';
   static const icArrowRightBig= '${assetsIcon}ic_arrow_right_big.svg';
 
 
