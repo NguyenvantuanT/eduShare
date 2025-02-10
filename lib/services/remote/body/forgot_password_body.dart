@@ -1,3 +1,0 @@
-class ForgotPasswordBody {
-  String? email;
-}
