@@ -17,16 +17,24 @@ dependencies:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
   flutter_slidable: ^3.1.1
-  flutter_zoom_drawer: ^3.2.0
+  flutter_svg: ^2.0.16
   image_picker: ^1.1.2
   path: ^1.9.0
   shared_preferences: ^2.3.3
   shimmer: ^3.0.0
-
+  video_player: ^2.9.2
+  youtube_player_flutter: ^9.1.1
+  better_player: ^0.0.84
+  readmore: ^3.0.0
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.17.0
+  date_picker_timeline: ^1.0.0
+  flutter_staggered_animations: ^1.0.0
+  
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/icon.jpg"
+  image_path: "assets/images/logo.png"
 
 dev_dependencies:
   flutter_test:
@@ -36,6 +44,53 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-  - assets/icon/
+  - assets/icons/
   - assets/images/
-
+  fonts:
+    - family: SFProText
+      fonts:
+        - asset: fonts/SF-Pro-Text-Black.otf
+          weight: 900
+        - asset: fonts/SF-Pro-Text-BlackItalic.otf
+          weight: 900
+          style: italic
+        - asset: fonts/SF-Pro-Text-Bold.otf
+          weight: 700
+        - asset: fonts/SF-Pro-Text-BoldItalic.otf
+          weight: 700
+          style: italic
+        - asset: fonts/SF-Pro-Text-Heavy.otf
+          weight: 800
+        - asset: fonts/SF-Pro-Text-HeavyItalic.otf
+          weight: 800
+          style: italic
+        - asset: fonts/SF-Pro-Text-Light.otf
+          weight: 300
+        - asset: fonts/SF-Pro-Text-LightItalic.otf
+          weight: 300
+          style: italic
+        - asset: fonts/SF-Pro-Text-Medium.otf
+          weight: 500
+        - asset: fonts/SF-Pro-Text-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: fonts/SF-Pro-Text-Regular.otf
+          weight: 400
+        - asset: fonts/SF-Pro-Text-RegularItalic.otf
+          weight: 400
+          style: italic
+        - asset: fonts/SF-Pro-Text-Semibold.otf
+          weight: 600
+        - asset: fonts/SF-Pro-Text-SemiboldItalic.otf
+          weight: 600
+          style: italic
+        - asset: fonts/SF-Pro-Text-Thin.otf
+          weight: 100
+        - asset: fonts/SF-Pro-Text-ThinItalic.otf
+          weight: 100
+          style: italic
+        - asset: fonts/SF-Pro-Text-Ultralight.otf
+          weight: 200
+        - asset: fonts/SF-Pro-Text-UltralightItalic.otf
+          weight: 200
+          style: italic
