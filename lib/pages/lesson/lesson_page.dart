@@ -2,6 +2,8 @@ import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
+import 'package:chat_app/services/local/shared_prefs.dart';
+import 'package:chat_app/services/remote/learning_progress_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -11,21 +13,28 @@ class LessonPage extends StatefulWidget {
     super.key,
     required this.docIdCourse,
     required this.index,
+    this.updateProg,
   });
 
   final String docIdCourse;
   final int index;
+  final VoidCallback? updateProg;
 
   @override
   State<LessonPage> createState() => _LessonPageState();
 }
 
 class _LessonPageState extends State<LessonPage> {
+  LearningProgressServices learProgServices = LearningProgressServices();
+  LearningProgressModel learProg = LearningProgressModel();
   LessonServices lessonServices = LessonServices();
+
   YoutubePlayerController? controller;
   LessonModel lesson = LessonModel();
   List<LessonModel> lessons = [];
+
   late int lessonIndex;
+  String email = SharedPrefs.user?.email ?? '';
 
   List<String> tabNames = ['Information', 'Lessons'];
   int selectIndex = 0;
@@ -33,21 +42,85 @@ class _LessonPageState extends State<LessonPage> {
   @override
   void initState() {
     super.initState();
-    getVideo();
     lessonIndex = widget.index;
+    getVideo();
+  }
+
+  void getProgress() {
+    learProgServices
+        .getLessonProgress(
+            docIdCourse: widget.docIdCourse, lessonId: lesson.lessonId)
+        .then((value) {
+      if (value == null) {
+        learProg = LearningProgressModel(isCompleted: false, progress: 0.0);
+        learProgServices.createLessonProgress(
+          docIdCourse: widget.docIdCourse,
+          lessonId: lesson.lessonId,
+          value: learProg,
+        );
+        setState(() {});
+      }
+      learProg = value ?? LearningProgressModel();
+      setState(() {});
+    });
   }
 
   void getVideo() {
     lessonServices.getLessons(widget.docIdCourse).then((values) {
       lessons = values;
       lesson = lessons[lessonIndex];
+
+      getProgress();
+
       controller = YoutubePlayerController(
         initialVideoId: lesson.videoPath!,
-        flags: const YoutubePlayerFlags(),
-      );
+        flags: const YoutubePlayerFlags(
+          autoPlay: false,
+          loop: false,
+        ),
+      )..addListener(updateProgress);
+
       setState(() {});
     }).catchError((onError) {
-      debugPrint('object $onError');
+      debugPrint('Lỗi khi tải video: $onError');
+    });
+  }
+
+  void updateProgress() {
+    if (controller == null) return;
+    if (controller!.metadata.duration.inSeconds == 0) return;
+
+    final duration = controller!.metadata.duration.inSeconds;
+    final position = controller!.value.position.inSeconds;
+
+    double progress = position / duration;
+
+    setState(() {
+      learProg.progress = progress;
+    });
+    widget.updateProg?.call();
+    saveProgress(progress);
+  }
+
+  void saveProgress(double progress) {
+    if (lesson.lessonId == null || widget.docIdCourse.isEmpty) return;
+
+    bool isCompleted = progress >= 0.9;
+
+    LearningProgressModel updatedProgress = LearningProgressModel(
+      progress: progress,
+      isCompleted: isCompleted,
+    );
+
+    learProgServices
+        .updateLessonProgress(
+          docIdCourse: widget.docIdCourse,
+          lessonId: lesson.lessonId ?? '',
+          value: updatedProgress,
+        )
+        .then((_) {})
+        .catchError((error) {
+      debugPrint('Lỗi khi lưu tiến độ: $error');
     });
   }
 
@@ -123,7 +196,7 @@ class _LessonPageState extends State<LessonPage> {
       left: 20.0,
       top: 230.0,
       right: 20.0,
-      bottom: 56.0,
+      bottom: 20.0,
       child: ListView(
         children: [
           Container(
@@ -179,6 +252,21 @@ class _LessonPageState extends State<LessonPage> {
       children: [
         const SizedBox(height: 10.0),
         Text(
+          'Tiến độ: ',
+          style: AppStyles.STYLE_14.copyWith(
+            color: AppColor.black,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: 10.0),
+        LinearProgressIndicator(
+          value: learProg.progress ?? 0.0,
+          backgroundColor: AppColor.grey,
+          valueColor: const AlwaysStoppedAnimation<Color>(AppColor.blue),
+        ),
+        const SizedBox(height: 10.0),
+        Text(
           'Description ',
           style: AppStyles.STYLE_16.copyWith(
             color: AppColor.black,
@@ -195,6 +283,7 @@ class _LessonPageState extends State<LessonPage> {
             fontWeight: FontWeight.w500,
           ),
         ),
+        const SizedBox(height: 10.0),
       ],
     );
   }

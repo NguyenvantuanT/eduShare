@@ -12,7 +12,7 @@ class AccountServices implements ImplAccountServices {
   Future<dynamic> getProfile(String email) async {
     try {
       CollectionReference userCollection =
-          FirebaseFirestore.instance.collection('users'); // tham chieu
+          FirebaseFirestore.instance.collection('users'); 
       DocumentSnapshot<Object?> snapshot =
           await userCollection.doc(email).get();
       SharedPrefs.user =
@@ -27,7 +27,7 @@ class AccountServices implements ImplAccountServices {
     UserModel user = SharedPrefs.user ?? UserModel();
     try {
       CollectionReference userCollection =
-          FirebaseFirestore.instance.collection('users'); // tham chieu
+          FirebaseFirestore.instance.collection('users'); 
       await userCollection.doc(user.email).update(body.toJson());
     } on FirebaseException catch (e) {
       throw Exception(e.message);

@@ -14,7 +14,6 @@ import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/enum.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
