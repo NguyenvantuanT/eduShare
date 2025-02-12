@@ -4,6 +4,7 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+
 class InformationCard extends StatelessWidget {
   InformationCard({
     super.key,
@@ -30,6 +31,7 @@ class InformationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
+      behavior: HitTestBehavior.translucent,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -3,6 +3,8 @@ class LessonModel {
   String? id;
   String? name;
   String? videoPath;
+  String? filePath;
+  String? fileName;
   String? description;
 
   LessonModel();
@@ -12,6 +14,8 @@ class LessonModel {
       ..id = json['id'] as String?
       ..name = json['name'] as String?
       ..videoPath = json['videoPath'] as String?
+      ..filePath = json['filePath'] as String?
+      ..fileName = json['fileName'] as String?
       ..description = json['description'] as String?;
   }
 
@@ -20,6 +24,8 @@ class LessonModel {
       'id': id,
       'name': name,
       'videoPath': videoPath,
+      'filePath': filePath,
+      'fileName': fileName,
       'description': description,
     };
   }

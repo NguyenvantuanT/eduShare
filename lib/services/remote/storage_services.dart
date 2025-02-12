@@ -22,4 +22,19 @@ class StorageServices {
   Future<String?> post({required File image}) async {
     return await uploadUserImg(image);
   }
+
+
+  Future<String?> uploadFile(String fileName , File file) async {
+    
+    final snapshot = await _storage.ref("$email/File").child('$fileName.pdf').putFile(file);
+    try {
+      return snapshot.ref.getDownloadURL();
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> postFile({required String fileName , required File file}) async {
+    return await uploadUserImg(file);
+  }
 }
