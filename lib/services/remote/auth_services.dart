@@ -18,7 +18,7 @@ class AuthServices implements ImplAuthServices {
   Future<dynamic> register(RegisterBody body) async {
     try {
       CollectionReference userCollection =
-          FirebaseFirestore.instance.collection('users'); // tham chieu
+          FirebaseFirestore.instance.collection('users'); 
 
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: body.email ?? '', password: body.password ?? '');

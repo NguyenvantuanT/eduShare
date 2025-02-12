@@ -77,4 +77,18 @@ class LessonServices implements ImplLessonServices {
       throw Exception(e.message);
     }
   }
+
+  // Future<dynamic> updateProgress(String docIdCourse, String lessonId) async {
+  //   try {
+  //     await courseCollection
+  //         .doc(docIdCourse)
+  //         .collection(lessons)
+  //         .doc(lessonId)
+  //         .update(
+
+  //         );
+  //   } on FirebaseException catch (e) {
+  //     throw Exception(e.message);
+  //   }
+  // } 
 }

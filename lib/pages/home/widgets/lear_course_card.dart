@@ -22,7 +22,7 @@ class LearCourseCard extends StatelessWidget {
         margin: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
         decoration: BoxDecoration(
             color: AppColor.white,
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(7.0),
             boxShadow: AppShadow.boxShadowContainer),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

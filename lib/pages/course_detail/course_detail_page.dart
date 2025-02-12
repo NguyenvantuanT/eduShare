@@ -13,6 +13,7 @@ import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/comment_services.dart';
 import 'package:chat_app/services/remote/course_services.dart';
+import 'package:chat_app/services/remote/learning_progress_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,7 +30,9 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
+  LearningProgressServices learProgServices = LearningProgressServices();
   TextEditingController commentController = TextEditingController();
+  Map<String, double> lessonProgress = {};
   CourseServices courseServices = CourseServices();
   LessonServices lessonServices = LessonServices();
   CommentServices commentServices = CommentServices();
@@ -49,24 +52,38 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   void getCourse() {
     setState(() => isLoading = true);
-    courseServices.getCourse(widget.docId).then((value) {
-      course = value;
-      isFavorite = (course.favorites ?? []).contains(user.email);
-      isLearning = (course.learnings ?? []).contains(user.email);
+    courseServices
+        .getCourse(widget.docId)
+        .then((value) {
+          course = value;
+          isFavorite = (course.favorites ?? []).contains(user.email);
+          isLearning = (course.learnings ?? []).contains(user.email);
 
-      Future.wait([
-        lessonServices.getLessons(widget.docId),
-        commentServices.getComments(widget.docId)
-      ]).then((results) {
-        lessons = results[0] as List<LessonModel>;
-        comments = results[1] as List<CommentModel>;
-        setState(() => isLoading = false);
-      });
-    }).catchError((error) {
-      // Consider proper error handling
-      print('Error fetching course: $error');
-    }).whenComplete(() => setState(() => isLoading = false));
+          Future.wait([
+            lessonServices.getLessons(widget.docId),
+            commentServices.getComments(widget.docId)
+          ]).then((results) {
+            lessons = results[0] as List<LessonModel>;
+            comments = results[1] as List<CommentModel>;
+            getProgress();
+            setState(() => isLoading = false);
+          });
+        })
+        .catchError((error) {})
+        .whenComplete(() => setState(() => isLoading = false));
   }
+
+  void getProgress() {
+  for (var lesson in lessons) {
+    learProgServices
+        .getLessonProgress(docIdCourse: widget.docId, lessonId: lesson.lessonId)
+        .then((value) {
+          setState(() {
+            lessonProgress[lesson.lessonId ?? ""] = value?.progress ?? 0.0;
+          });
+        });
+  }
+}
 
   void toggleFavorite(BuildContext context) {
     setState(() => isFavorite = !isFavorite);
@@ -120,12 +137,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         .then((_) {
       widget.onUpdate?.call();
       commentServices.getRating(widget.docId).then((courseRating) {
-        comments.singleWhere((e) => e.commentId == comment.commentId).rating = rating;
+        comments.singleWhere((e) => e.commentId == comment.commentId).rating =
+            rating;
         setState(() {});
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -361,6 +378,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Widget _buildLessonCard(BuildContext context, int idx, LessonModel lesson) {
+    final progress = lessonProgress[lesson.lessonId ?? ""] ?? 0.0;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.of(context).push(
@@ -368,6 +386,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           builder: (context) => LessonPage(
             docIdCourse: widget.docId,
             index: idx,
+            updateProg: getProgress,
           ),
         ),
       ),
@@ -375,6 +394,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         children: [
           Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Lesson: ${idx + 1}',
@@ -390,6 +410,22 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
                 ),
               ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 6.0),
+            color: AppColor.black,
+            height: 25.0,
+            width: 1.2,
+          ),
+          Expanded(
+            child: Text(
+              'Tiến độ: ${(progress * 100).toStringAsFixed(1)}%',
+              style: AppStyles.STYLE_14.copyWith(
+                color: AppColor.black,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.start,
             ),
           ),
           SvgPicture.asset(
