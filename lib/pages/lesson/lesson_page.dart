@@ -1,11 +1,15 @@
+import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/pages/lesson/PDF_viewer_page.dart';
+import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/learning_progress_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class LessonPage extends StatefulWidget {
@@ -128,20 +132,8 @@ class _LessonPageState extends State<LessonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      appBar: AppBar(
-        backgroundColor: AppColor.bgColor,
-        centerTitle: true,
-        leading: InkWell(
-          onTap: () => Navigator.pop(context),
-          highlightColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          child: const Icon(Icons.arrow_back_ios_new,
-              size: 22.0, color: AppColor.textColor),
-        ),
-        title: Text(
-          lesson.name ?? '',
-          style: AppStyles.STYLE_24.copyWith(color: AppColor.textColor),
-        ),
+      appBar: AppTabBarBlue(
+        title: lesson.name ?? '',
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
@@ -253,7 +245,7 @@ class _LessonPageState extends State<LessonPage> {
         const SizedBox(height: 10.0),
         Text(
           'Tiến độ: ',
-          style: AppStyles.STYLE_14.copyWith(
+          style: AppStyles.STYLE_16.copyWith(
             color: AppColor.black,
             fontWeight: FontWeight.w500,
           ),
@@ -265,6 +257,55 @@ class _LessonPageState extends State<LessonPage> {
           backgroundColor: AppColor.grey,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColor.blue),
         ),
+        if (lesson.filePath != null) ...[
+          const SizedBox(height: 10.0),
+          Text(
+            'File: ',
+            style: AppStyles.STYLE_16.copyWith(
+              color: AppColor.black,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.start,
+          ),
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => PdfViewerPage(
+                      url: lesson.filePath!,
+                    ))),
+            child: Container(
+              height: 50.0,
+              margin: const EdgeInsets.only(top: 5.0),
+              decoration: const BoxDecoration(
+                  color: AppColor.white,
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  boxShadow: AppShadow.boxShadowContainer),
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    AppImages.iconFile,
+                    color: AppColor.blue,
+                    height: 22.0,
+                    width: 22.0,
+                  ),
+                  const SizedBox(width: 5.0),
+                  Text(
+                    '${lesson.fileName}',
+                    style:
+                        AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
+                  ),
+                  const Spacer(),
+                  SvgPicture.asset(
+                    AppImages.icArrowRightBig,
+                    height: 22.0,
+                    width: 22.0,
+                  )
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         const SizedBox(height: 10.0),
         Text(
           'Description ',
@@ -272,15 +313,12 @@ class _LessonPageState extends State<LessonPage> {
             color: AppColor.black,
             fontWeight: FontWeight.w500,
           ),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4.6),
         Text(
-          textAlign: TextAlign.center,
           lesson.description ?? '-:-',
           style: AppStyles.STYLE_14.copyWith(
             color: AppColor.black,
-            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 10.0),
