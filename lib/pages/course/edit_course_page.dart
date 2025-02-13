@@ -96,14 +96,8 @@ class _EditCoursePageState extends State<EditCoursePage> {
   void createLesson() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MakeLessonPage(
-          onTap: (lesson) {
-            lessonServices.createLesson(widget.docId, lesson).then((value) {
-              lessons.add(value);
-              setState(() {});
-            });
-          },
-        ),
+        builder: (context) =>
+            MakeLessonPage(docIdCourse: widget.docId, onUpdate: getCourse),
       ),
     );
   }
@@ -112,12 +106,9 @@ class _EditCoursePageState extends State<EditCoursePage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditLessonPage(
-          value,
-          onEdit: (lesson) {
-            lessonServices
-                .updateLesson(widget.docId, lesson)
-                .then((_) => setState(() {}));
-          },
+          lessonId: value.lessonId ?? '',
+          courseId: widget.docId,
+          onUpdate: getCourse
         ),
       ),
     );
