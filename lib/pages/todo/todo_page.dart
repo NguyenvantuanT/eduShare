@@ -1,7 +1,7 @@
 import 'package:chat_app/components/app_modal.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/todo_model.dart';
-import 'package:chat_app/pages/todo/create_todo_page.dart';
+import 'package:chat_app/pages/create_todo/create_todo_page.dart';
 import 'package:chat_app/pages/todo/widgets/todo_card.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';

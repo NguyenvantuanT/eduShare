@@ -6,7 +6,9 @@ import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/course_detail/widgets/comment_card.dart';
+import 'package:chat_app/pages/course_detail/widgets/quiz_card.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
+import 'package:chat_app/pages/quiz/quiz_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -74,16 +76,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   void getProgress() {
-  for (var lesson in lessons) {
-    learProgServices
-        .getLessonProgress(docIdCourse: widget.docId, lessonId: lesson.lessonId)
-        .then((value) {
-          setState(() {
-            lessonProgress[lesson.lessonId ?? ""] = value?.progress ?? 0.0;
-          });
+    for (var lesson in lessons) {
+      learProgServices
+          .getLessonProgress(
+              docIdCourse: widget.docId, lessonId: lesson.lessonId)
+          .then((value) {
+        setState(() {
+          lessonProgress[lesson.lessonId ?? ""] = value?.progress ?? 0.0;
         });
+      });
+    }
   }
-}
 
   void toggleFavorite(BuildContext context) {
     setState(() => isFavorite = !isFavorite);
@@ -306,7 +309,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   style: AppStyles.STYLE_16_BOLD
                       .copyWith(color: AppColor.textColor),
                 ),
-                const SizedBox(height: 15.0),
+                const SizedBox(height: 20.0),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -319,7 +322,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     return _buildLessonCard(context, idx, lesson);
                   },
                 ),
+                const Divider(color: AppColor.blue),
                 const SizedBox(height: 15.0),
+                QuizCard(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => QuizPage(
+                            couseId: widget.docId,
+                          ),
+                        ))),
+                const SizedBox(height: 25.0),
                 Text(
                   'Comment',
                   style: AppStyles.STYLE_16_BOLD
@@ -414,7 +425,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           ),
           Container(
             margin: const EdgeInsets.only(right: 6.0),
-            color: AppColor.black,
+            color: AppColor.blue,
             height: 25.0,
             width: 1.2,
           ),

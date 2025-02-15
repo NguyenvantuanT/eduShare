@@ -7,14 +7,17 @@ import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/pages/course/widgets/lesson_card.dart';
-import 'package:chat_app/pages/lesson/edit_lesson_page.dart';
-import 'package:chat_app/pages/lesson/make_lesson_page.dart';
+import 'package:chat_app/pages/create_quiz/create_quiz_page.dart';
+import 'package:chat_app/pages/edit_lesson/edit_lesson_page.dart';
+import 'package:chat_app/pages/create_lesson/make_lesson_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
+import 'package:chat_app/services/remote/quiz_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +43,9 @@ class _EditCoursePageState extends State<EditCoursePage> {
   CourseServices courseServices = CourseServices();
   StorageServices storageServices = StorageServices();
   LessonServices lessonServices = LessonServices();
+  QuizServices quizServices = QuizServices();
   List<LessonModel> lessons = [];
+  List<QuizModel> quizs = [];
   bool isLoading = false;
   bool isLoad = false;
   ImagePicker picker = ImagePicker();
@@ -51,15 +56,13 @@ class _EditCoursePageState extends State<EditCoursePage> {
     setState(() => isLoading = true);
     courseServices
         .getCourse(widget.docId)
-        .then((value) {
+        .then((value) async {
           courseModel = value;
           nameCourseController.text = courseModel.name ?? "";
           categoryController.text = courseModel.category ?? "";
           describeController.text = courseModel.description ?? "";
-          lessonServices.getLessons(widget.docId).then((values) {
-            lessons = values;
-            setState(() {});
-          });
+          lessons = await lessonServices.getLessons(widget.docId);
+          getQuizs();
         })
         .catchError((onError) {})
         .whenComplete(() => setState(() => isLoading = false));
@@ -69,6 +72,11 @@ class _EditCoursePageState extends State<EditCoursePage> {
   void initState() {
     super.initState();
     getCourse();
+  }
+
+  void getQuizs() async {
+    quizs = await quizServices.getQuizs(widget.docId);
+    setState(() {});
   }
 
   Future<void> pickImageCourse() async {
@@ -102,14 +110,24 @@ class _EditCoursePageState extends State<EditCoursePage> {
     );
   }
 
+  void createQuiz() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CreateQuizPage(
+          courseId: widget.docId,
+          onUpdate: getQuizs,
+        ),
+      ),
+    );
+  }
+
   void editLesson(LessonModel value) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditLessonPage(
-          lessonId: value.lessonId ?? '',
-          courseId: widget.docId,
-          onUpdate: getCourse
-        ),
+            lessonId: value.lessonId ?? '',
+            courseId: widget.docId,
+            onUpdate: getCourse),
       ),
     );
   }
@@ -199,8 +217,11 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       const SizedBox(height: 20.0),
                       _buildSelectImage(),
                       const SizedBox(height: 20.0),
+                      const Divider(color: AppColor.blue),
+                      const SizedBox(height: 10.0),
                       GestureDetector(
                         onTap: createLesson,
+                        behavior: HitTestBehavior.translucent,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -245,6 +266,61 @@ class _EditCoursePageState extends State<EditCoursePage> {
                                   onEdit: () => editLesson(lesson),
                                   onDelete: () => deleteLesson(
                                       context, lesson.lessonId ?? ""),
+                                ),
+                              )
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20.0),
+                      const Divider(color: AppColor.blue),
+                      const SizedBox(height: 10.0),
+                      GestureDetector(
+                        onTap: createQuiz,
+                        behavior: HitTestBehavior.translucent,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Add Quiz?',
+                              style: AppStyles.STYLE_14_BOLD
+                                  .copyWith(color: AppColor.textColor),
+                            ),
+                            Text(
+                              'Tap to create Quiz',
+                              style: AppStyles.STYLE_14
+                                  .copyWith(color: AppColor.greyText),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      ListView.separated(
+                        itemCount: quizs.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        separatorBuilder: (_, __) => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Divider(color: AppColor.grey, height: 1.0),
+                        ),
+                        itemBuilder: (context, index) {
+                          final quiz = quizs[index];
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Quiz ${index + 1}:",
+                                style: AppStyles.STYLE_14_BOLD.copyWith(
+                                  color: AppColor.textColor,
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Text(
+                                  quiz.question ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               )
                             ],

@@ -1,7 +1,7 @@
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/lesson_model.dart';
-import 'package:chat_app/pages/lesson/PDF_viewer_page.dart';
+import 'package:chat_app/pages/pdf/PDF_viewer_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
