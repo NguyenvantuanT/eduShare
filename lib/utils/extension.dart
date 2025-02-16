@@ -11,6 +11,7 @@ extension DateTimeExt on DateTime {
   }
 }
 
+
 extension IntExt on int {
   SizedBox get sizeWidth => SizedBox(width: toDouble());
   SizedBox get sizeHeight => SizedBox(height: toDouble());

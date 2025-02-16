@@ -27,7 +27,7 @@ class ResultPage extends StatelessWidget {
           child: Column(
             children: [
               Stack(
-                alignment: Alignment.center,  
+                alignment: Alignment.center,
                 children: [
                   Lottie.network(
                     'https://lottie.host/baba8989-bf15-4dfe-8cdd-3b637d1bc58a/gWn4keqlvz.json',
@@ -66,10 +66,9 @@ class ResultPage extends StatelessWidget {
                 widthFactor: 0.8,
                 child: AppElevatedButton(
                   text: 'Quit',
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainPage()),
-                  ),
+                  onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      (Route<dynamic> route) => false),
                 ),
               )
             ],
