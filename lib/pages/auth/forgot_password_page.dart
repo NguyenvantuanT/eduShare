@@ -1,63 +1,24 @@
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
-import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/pages/auth/login_page.dart';
+import 'package:chat_app/pages/auth/forgot_password_vm.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/auth_services.dart';
-import 'package:chat_app/services/remote/body/forgot_password_body.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:stacked/stacked.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
+class ForgotPasswordPage extends StackedView<ForgotPasswordVM> {
   const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
-}
-
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  final emailController = TextEditingController();
-  bool isLoading = false;
-  final formKey = GlobalKey<FormState>();
-  AuthServices authServices = AuthServices();
-
-  Future<void> _onSubmit(BuildContext context) async {
-    if (formKey.currentState!.validate() == false) return;
-
-    setState(() => isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    ForgotPasswordBody body = ForgotPasswordBody()
-      ..email = emailController.text.trim();
-    authServices.forgotPassword(body).then((_) {
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        text: "Check your email and change pass",
-      );
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage(email: body.email)),
-          (Route<dynamic> route) => false);
-    }).catchError((error) {
-      FirebaseAuthException a = error as FirebaseAuthException;
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        text: a.message ?? "",
-      );
-    }).whenComplete(() {
-      setState(() => isLoading = false);
-    });
-  }
+  ForgotPasswordVM viewModelBuilder(BuildContext context) => ForgotPasswordVM();
 
   @override
-  Widget build(BuildContext context) {
+  Widget builder(
+      BuildContext context, ForgotPasswordVM viewModel, Widget? child) {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -100,7 +61,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     topRight: Radius.circular(40.0)),
               ),
               child: Form(
-                key: formKey,
+                key: viewModel.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,21 +73,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     const SizedBox(height: 20.0),
                     AppTextField(
-                      controller: emailController,
+                      controller: viewModel.emailController,
                       labelText: 'Username/Email',
                       textInputAction: TextInputAction.next,
                       validator: Validator.required,
                     ),
                     const SizedBox(height: 20.0),
-                    
-                    
-                    const SizedBox(height: 40.0),
                     AppElevatedButton(
                       text: 'Send',
-                      isDisable: isLoading,
-                      onPressed: () {},
+                      isDisable: viewModel.isLoading,
+                      onPressed: () => viewModel.onSubmit(context),
                     ),
-                    
                   ],
                 ),
               ),
@@ -134,21 +91,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           )
         ],
       ),
-    );
-  }
-
-  Widget _headerText() {
-    return const Text(
-      "V T I N T E R",
-      style: TextStyle(fontSize: 22),
-    );
-  }
-
-  Icon _headerIcon() {
-    return const Icon(
-      Icons.person,
-      color: AppColor.grey,
-      size: 80,
     );
   }
 }

@@ -2,174 +2,37 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
-import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/models/lesson_model.dart';
-import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/pages/course/widgets/lesson_card.dart';
-import 'package:chat_app/pages/create_quiz/create_quiz_page.dart';
-import 'package:chat_app/pages/edit_lesson/edit_lesson_page.dart';
-import 'package:chat_app/pages/create_lesson/make_lesson_page.dart';
+import 'package:chat_app/pages/edit_course/edit_course_vm.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/course_services.dart';
-import 'package:chat_app/services/remote/lesson_services.dart';
-import 'package:chat_app/services/remote/quiz_services.dart';
-import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:stacked/stacked.dart';
 
-class EditCoursePage extends StatefulWidget {
-  const EditCoursePage(
-    this.docId, {
-    super.key,
-  });
-
+class EditCoursePage extends StackedView<EditCourseVM> {
+  const EditCoursePage(this.docId, {super.key});
   final String docId;
 
   @override
-  State<EditCoursePage> createState() => _EditCoursePageState();
-}
-
-class _EditCoursePageState extends State<EditCoursePage> {
-  TextEditingController nameCourseController = TextEditingController();
-  TextEditingController categoryController = TextEditingController();
-  TextEditingController describeController = TextEditingController();
-  CourseServices courseServices = CourseServices();
-  StorageServices storageServices = StorageServices();
-  LessonServices lessonServices = LessonServices();
-  QuizServices quizServices = QuizServices();
-  List<LessonModel> lessons = [];
-  List<QuizModel> quizs = [];
-  bool isLoading = false;
-  bool isLoad = false;
-  ImagePicker picker = ImagePicker();
-  File? imgCourse;
-  late CourseModel courseModel;
-
-  Future<void> getCourse() async {
-    setState(() => isLoading = true);
-    courseServices
-        .getCourse(widget.docId)
-        .then((value) async {
-          courseModel = value;
-          nameCourseController.text = courseModel.name ?? "";
-          categoryController.text = courseModel.category ?? "";
-          describeController.text = courseModel.description ?? "";
-          lessons = await lessonServices.getLessons(widget.docId);
-          getQuizs();
-        })
-        .catchError((onError) {})
-        .whenComplete(() => setState(() => isLoading = false));
+  void onViewModelReady(EditCourseVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  void initState() {
-    super.initState();
-    getCourse();
-  }
-
-  void getQuizs() async {
-    quizs = await quizServices.getQuizs(widget.docId) ?? [];
-    setState(() {});
-  }
-
-  Future<void> pickImageCourse() async {
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-    if (file == null) return;
-    setState(() => imgCourse = File(file.path));
-  }
-
-  Future<void> updateCourse(BuildContext context) async {
-    setState(() => isLoad = true);
-    courseModel.name = nameCourseController.text.trim();
-    courseModel.category = categoryController.text.trim();
-    courseModel.description = describeController.text.trim();
-    courseModel.imageCourse = imgCourse != null
-        ? await storageServices.post(image: imgCourse!)
-        : courseModel.imageCourse;
-    courseServices.updateCourse(courseModel).then((_) {
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-    }).catchError((onError) {
-      debugPrint(onError.toString());
-    }).whenComplete(() => setState(() => isLoad = false));
-  }
-
-  void createLesson() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) =>
-            MakeLessonPage(docIdCourse: widget.docId, onUpdate: getCourse),
-      ),
-    );
-  }
-
-  void createQuiz() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CreateQuizPage(
-          courseId: widget.docId,
-          onUpdate: getQuizs,
-        ),
-      ),
-    );
-  }
-
-  void editLesson(LessonModel value) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => EditLessonPage(
-            lessonId: value.lessonId ?? '',
-            courseId: widget.docId,
-            onUpdate: getCourse),
-      ),
-    );
-  }
-
-  void deleteLesson(BuildContext context, String lessonId) {
-    if (!context.mounted) return;
-    AppDialog.dialog(
-      context,
-      title: const Align(
-        alignment: Alignment.topLeft,
-        child: Icon(
-          Icons.delete,
-          color: AppColor.blue,
-        ),
-      ),
-      content: "Your want delete lesson 🥲",
-      action: () {
-        lessonServices.deleteLesson(widget.docId, lessonId).then(
-              (_) => setState(
-                () => lessons.removeWhere(
-                  (e) => e.lessonId == lessonId,
-                ),
-              ),
-            );
-      },
-    );
-  }
+  EditCourseVM viewModelBuilder(BuildContext context) => EditCourseVM(docId);
 
   @override
-  void dispose() {
-    super.dispose();
-    nameCourseController.dispose();
-    categoryController.dispose();
-    describeController.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, EditCourseVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: const AppTabBarBlue(title: "Edit Course"),
-      body: isLoading
+      body: viewModel.isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColor.blue),
             )
@@ -188,7 +51,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       ),
                       const SizedBox(height: 10.0),
                       AppTextField(
-                        controller: nameCourseController,
+                        controller: viewModel.nameCourseController,
                         labelText: "e.g., how to ...",
                         textInputAction: TextInputAction.next,
                         validator: Validator.required,
@@ -201,7 +64,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       ),
                       const SizedBox(height: 10.0),
                       AppTextField(
-                        controller: categoryController,
+                        controller: viewModel.categoryController,
                         labelText: "e.g., biology",
                         textInputAction: TextInputAction.next,
                         validator: Validator.required,
@@ -213,14 +76,14 @@ class _EditCoursePageState extends State<EditCoursePage> {
                             .copyWith(color: AppColor.textColor),
                       ),
                       const SizedBox(height: 10.0),
-                      _buildTextFieldDes(),
+                      _buildTextFieldDes(viewModel),
                       const SizedBox(height: 20.0),
-                      _buildSelectImage(),
+                      _buildSelectImage(viewModel),
                       const SizedBox(height: 20.0),
                       const Divider(color: AppColor.blue),
                       const SizedBox(height: 10.0),
                       GestureDetector(
-                        onTap: createLesson,
+                        onTap:() => viewModel.createLesson(context),
                         behavior: HitTestBehavior.translucent,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +103,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       ),
                       const SizedBox(height: 20.0),
                       ListView.separated(
-                        itemCount: lessons.length,
+                        itemCount: viewModel.lessons.length,
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
@@ -249,7 +112,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                           child: Divider(color: AppColor.grey, height: 1.0),
                         ),
                         itemBuilder: (context, index) {
-                          final lesson = lessons[index];
+                          final lesson = viewModel.lessons[index];
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -263,8 +126,8 @@ class _EditCoursePageState extends State<EditCoursePage> {
                               Expanded(
                                 child: LessonCard(
                                   lesson,
-                                  onEdit: () => editLesson(lesson),
-                                  onDelete: () => deleteLesson(
+                                  onEdit: () => viewModel.editLesson(context,lesson),
+                                  onDelete: () => viewModel.deleteLesson(
                                       context, lesson.lessonId ?? ""),
                                 ),
                               )
@@ -276,7 +139,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       const Divider(color: AppColor.blue),
                       const SizedBox(height: 10.0),
                       GestureDetector(
-                        onTap: createQuiz,
+                        onTap:() => viewModel.createQuiz(context),
                         behavior: HitTestBehavior.translucent,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +159,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       ),
                       const SizedBox(height: 20.0),
                       ListView.separated(
-                        itemCount: quizs.length,
+                        itemCount: viewModel.quizs.length,
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
@@ -305,7 +168,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                           child: Divider(color: AppColor.grey, height: 1.0),
                         ),
                         itemBuilder: (context, index) {
-                          final quiz = quizs[index];
+                          final quiz = viewModel.quizs[index];
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -336,16 +199,15 @@ class _EditCoursePageState extends State<EditCoursePage> {
                   right: 16.0,
                   child: AppElevatedButton(
                     text: 'Update',
-                    isDisable: isLoad,
-                    onPressed: () => updateCourse(context),
+                    isDisable: viewModel.isLoad,
+                    onPressed: () => viewModel.updateCourse(context),
                   ),
                 )
               ],
             ),
     );
   }
-
-  Widget _buildSelectImage() {
+  Widget _buildSelectImage(EditCourseVM viewModel) {
     const radius = 30.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,19 +221,19 @@ class _EditCoursePageState extends State<EditCoursePage> {
           children: [
             ClipRRect(
                 borderRadius: BorderRadius.circular(12.0),
-                child: imgCourse != null
+                child: viewModel.imgCourse != null
                     ? Container(
                         height: radius * 2,
                         width: radius * 2,
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             fit: BoxFit.cover,
-                            image: FileImage(File(imgCourse?.path ?? ''))
+                            image: FileImage(File(viewModel.imgCourse?.path ?? ''))
                                 as ImageProvider,
                           ),
                         ))
                     : CachedNetworkImage(
-                        imageUrl: courseModel.imageCourse ?? '',
+                        imageUrl: viewModel.courseModel.imageCourse ?? '',
                         fit: BoxFit.cover,
                         height: radius * 2,
                         width: radius * 2,
@@ -403,7 +265,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
                       )),
             const SizedBox(width: 10.0),
             GestureDetector(
-              onTap: pickImageCourse,
+              onTap: viewModel.pickImageCourse,
               child: Container(
                   height: 60.0,
                   width: 60.0,
@@ -421,14 +283,14 @@ class _EditCoursePageState extends State<EditCoursePage> {
     );
   }
 
-  TextField _buildTextFieldDes() {
+  TextField _buildTextFieldDes(EditCourseVM viewModel) {
     OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
           borderSide: BorderSide(color: color, width: 1.2),
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
         );
     return TextField(
       maxLines: 5,
-      controller: describeController,
+      controller: viewModel.describeController,
       decoration: InputDecoration(
           border: outlineInputBorder(AppColor.grey),
           focusedBorder: outlineInputBorder(AppColor.grey),
@@ -438,4 +300,6 @@ class _EditCoursePageState extends State<EditCoursePage> {
           )),
     );
   }
+  
 }
+

@@ -3,6 +3,7 @@ import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/todo_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
+import 'package:chat_app/pages/home/home_vm.dart';
 import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/course_card.dart';
 import 'package:chat_app/pages/home/widgets/todo_item.dart';
@@ -10,120 +11,30 @@ import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/pages/search/search_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
-import 'package:chat_app/services/remote/todo_services.dart';
 import 'package:chat_app/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stacked/stacked.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StackedView<HomeVM> {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
+  HomeVM viewModelBuilder(BuildContext context) => HomeVM();
 
-class _HomePageState extends State<HomePage> {
-  final messageController = TextEditingController();
-  PageController pageController = PageController();
-  ScrollController scrollController = ScrollController();
-  FocusNode messFocus = FocusNode();
-  CourseServices courseServices = CourseServices();
-  TodoServices todoServices = TodoServices();
-  List<CourseModel> coursesLearning = [];
-  List<CourseModel> coursesMoblie = [];
-  List<CourseModel> coursesWeb = [];
-  List<CourseModel> coursesAI = [];
-  List<CourseModel> coursesData = [];
-  List<CourseModel> coursesDesign = [];
-  List<CourseModel> coursesLanguage = [];
-  List<TodoModel> todos = [];
-  int selectIndex = 0;
-  bool isLoading = false;
-
-  void _getCourseLearning() async {
-    setState(() => isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
-    courseServices.getLearnings().then((values) {
-      setState(() {
-        coursesLearning = values;
-        isLoading = false;
-      });
-    }).catchError((onError) {
-      isLoading = false;
-      setState(() {});
-    });
-  }
-
-  void _getCourseMoblie() {
-    courseServices.getCourseByCategory(CategoryType.Mobile).then((values) {
-      coursesMoblie = values;
-      setState(() {});
-    });
-  }
-
-  void _getCourseWeb() {
-    courseServices.getCourseByCategory(CategoryType.Web).then((values) {
-      coursesWeb = values;
-      setState(() {});
-    });
-  }
-
-  void _getCourseAI() {
-    courseServices.getCourseByCategory(CategoryType.AI).then((values) {
-      coursesAI = values;
-      setState(() {});
-    });
-  }
-
-  void _getCourseData() {
-    courseServices.getCourseByCategory(CategoryType.Data).then((values) {
-      coursesData = values;
-      setState(() {});
-    });
-  }
-
-  void _getCourseDesign() {
-    courseServices.getCourseByCategory(CategoryType.Design).then((values) {
-      coursesDesign = values;
-      setState(() {});
-    });
-  }
-
-  void _getCourseLanguage() {
-    courseServices.getCourseByCategory(CategoryType.Language).then((values) {
-      coursesLanguage = values;
-      setState(() {});
-    });
-  }
-
-  void getTodos() {
-    todoServices.getTodos().then((values) {
-      todos = values ?? [];
-      setState(() {});
-    });
+  @override
+  void onViewModelReady(HomeVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  void initState() {
-    super.initState();
-    getTodos();
-    _getCourseLearning();
-    _getCourseMoblie();
-    _getCourseWeb();
-    _getCourseAI();
-    _getCourseData();
-    _getCourseDesign();
-    _getCourseLanguage();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, HomeVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      body: isLoading
+      body: viewModel.isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColor.blue),
             )
@@ -141,9 +52,7 @@ class _HomePageState extends State<HomePage> {
                             readOnly: true,
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => SearchPage(
-                                  onUpdate: _getCourseLearning,
-                                ),
+                                builder: (context) => const SearchPage(),
                               ),
                             ),
                           ),
@@ -159,12 +68,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                         SizedBox(
                           height: 120.0,
-                          child: todos.isEmpty
+                          child: viewModel.todos.isEmpty
                               ? Padding(
-                                 padding: const EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0)
                                       .copyWith(bottom: 20.0),
-                                child: TodoItem(
+                                  child: TodoItem(
                                     TodoModel()
                                       ..color = 0
                                       ..title = "Make your Todo"
@@ -174,9 +83,9 @@ class _HomePageState extends State<HomePage> {
                                             builder: (context) =>
                                                 const MainPage(index: 1))),
                                   ),
-                              )
+                                )
                               : ListView.separated(
-                                  itemCount: todos.length,
+                                  itemCount: viewModel.todos.length,
                                   scrollDirection: Axis.horizontal,
                                   padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0)
@@ -184,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                                   separatorBuilder: (_, __) =>
                                       const SizedBox(width: 8.0),
                                   itemBuilder: (context, idx) {
-                                    final todo = todos[idx];
+                                    final todo = viewModel.todos[idx];
                                     return AnimationConfiguration.staggeredList(
                                       position: idx,
                                       child: SlideAnimation(
@@ -209,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                 .copyWith(color: AppColor.textColor),
                           ),
                         ),
-                        coursesLearning.isEmpty
+                        viewModel.coursesLearning.isEmpty
                             ? Align(
                                 alignment: Alignment.centerLeft,
                                 child: _noLearning(context),
@@ -217,17 +126,20 @@ class _HomePageState extends State<HomePage> {
                             : SizedBox(
                                 height: 130.0,
                                 child: ListView.separated(
-                                  itemCount: coursesLearning.length,
+                                  itemCount: viewModel.coursesLearning.length,
                                   padding: const EdgeInsets.only(left: 16.0),
                                   scrollDirection: Axis.horizontal,
                                   separatorBuilder: (_, __) =>
                                       const SizedBox(width: 10.0),
                                   itemBuilder: (_, idx) {
-                                    final course = coursesLearning[idx];
+                                    final course =
+                                        viewModel.coursesLearning[idx];
                                     return LearCourseCard(
                                       course,
                                       onPressed: () => _navigatorDetailCourse(
-                                          context, course.docId ?? ''),
+                                          context,
+                                          course.docId ?? '',
+                                          viewModel),
                                     );
                                   },
                                 ),
@@ -235,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 10.0),
                         SizedBox(
                           height: 54.0,
-                          child: _buildTabBar(),
+                          child: _buildTabBar(viewModel),
                         ),
                       ],
                     ),
@@ -246,57 +158,61 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Expanded(
                     child: PageView(
-                      controller: pageController,
-                      onPageChanged: (int index) {
-                        setState(() => selectIndex = index);
-                      },
+                      controller: viewModel.pageController,
+                      onPageChanged: viewModel.changeIndex,
                       children: [
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseMoblie();
+                            viewModel.getCourseMoblie();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesMoblie),
+                            child: _buildGridVIew(
+                                viewModel.coursesMoblie, viewModel),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseWeb();
+                            viewModel.getCourseWeb();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesWeb),
+                            child:
+                                _buildGridVIew(viewModel.coursesWeb, viewModel),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseAI();
+                            viewModel.getCourseAI();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesAI),
+                            child:
+                                _buildGridVIew(viewModel.coursesAI, viewModel),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseData();
+                            viewModel.getCourseData();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesData),
+                            child: _buildGridVIew(
+                                viewModel.coursesData, viewModel),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseDesign();
+                            viewModel.getCourseDesign();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesDesign),
+                            child: _buildGridVIew(
+                                viewModel.coursesDesign, viewModel),
                           ),
                         ),
                         RefreshIndicator(
                           onRefresh: () async {
-                            _getCourseLanguage();
+                            viewModel.getCourseLanguage();
                           },
                           child: Center(
-                            child: _buildGridVIew(coursesLanguage),
+                            child: _buildGridVIew(
+                                viewModel.coursesLanguage, viewModel),
                           ),
                         ),
                       ],
@@ -308,14 +224,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _navigatorDetailCourse(BuildContext context, String? docId) {
+  void _navigatorDetailCourse(
+      BuildContext context, String? docId, HomeVM viewModel) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CourseDetailPage(
           docId ?? "",
           onUpdate: () {
-            _getCourseLearning();
-            _getCourseMoblie();
+            viewModel.getCourseLearning();
+            viewModel.getCourseMoblie();
           },
         ),
       ),
@@ -334,7 +251,8 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         height: 120.0,
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        padding: const EdgeInsets.symmetric(horizontal: 5.0).copyWith(bottom : 5.0),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 5.0).copyWith(bottom: 5.0),
         decoration: BoxDecoration(
             color: AppColor.blue,
             borderRadius: BorderRadius.circular(8.0),
@@ -351,14 +269,13 @@ class _HomePageState extends State<HomePage> {
               "Find course you want 😘",
               style: AppStyles.STYLE_14.copyWith(color: AppColor.white),
             ),
-            
           ],
         ),
       ),
     );
   }
 
-  GridView _buildGridVIew(List<CourseModel> list) {
+  GridView _buildGridVIew(List<CourseModel> list, HomeVM viewModel) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -376,12 +293,12 @@ class _HomePageState extends State<HomePage> {
         final course = list[index];
         return CourseCard(course,
             onPressed: () =>
-                _navigatorDetailCourse(context, course.docId ?? ''));
+                _navigatorDetailCourse(context, course.docId ?? '', viewModel));
       },
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(HomeVM viewModel) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -396,19 +313,16 @@ class _HomePageState extends State<HomePage> {
                 color: AppColor.bgColor,
                 border: Border(
                     bottom: BorderSide(
-                        color: idx == selectIndex
+                        color: idx == viewModel.selectIndex
                             ? AppColor.blue
                             : AppColor.bgColor,
                         width: 3.0))),
             child: GestureDetector(
-              onTap: () {
-                selectIndex = idx;
-                pageController.jumpToPage(selectIndex);
-              },
+              onTap: () => viewModel.changeTab(idx),
               child: Text(
                 CategoryType.values[idx].name,
                 style: AppStyles.STYLE_14_BOLD.copyWith(
-                    color: idx == selectIndex
+                    color: idx == viewModel.selectIndex
                         ? AppColor.textColor
                         : AppColor.greyText),
               ),

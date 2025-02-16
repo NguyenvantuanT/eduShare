@@ -1,75 +1,35 @@
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
-import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
 import 'package:chat_app/components/text_field/app_text_field_password.dart';
 import 'package:chat_app/pages/auth/forgot_password_page.dart';
+import 'package:chat_app/pages/auth/login_vm.dart';
 import 'package:chat_app/pages/auth/register_page.dart';
-import 'package:chat_app/pages/main_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/account_services.dart';
-import 'package:chat_app/services/remote/auth_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
-import 'package:chat_app/services/remote/body/login_body.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stacked/stacked.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StackedView<LoginVM> {
   const LoginPage({super.key, this.email});
   final String? email;
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final formKey = GlobalKey<FormState>();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  AuthServices authServices = AuthServices();
-  AccountServices accountServices = AccountServices();
-  bool isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    emailController.text = widget.email ?? '';
-  }
-
-  Future<void> _submitLogin(BuildContext context) async {
-    if (formKey.currentState?.validate() == false) {
-      return;
-    }
-    setState(() => isLoading = true);
-
-    LoginBody body = LoginBody()
-      ..email = emailController.text.trim()
-      ..password = passwordController.text;
-
-    authServices.login(body).then((_) {
-      accountServices.getProfile(body.email ?? '').then((_) {
-        if (!context.mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => const MainPage(),
-          ),
-          (route) => false,
-        );
-      }).catchError((onError) {});
-    }).catchError((onError) {
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        text: 'Email or Password is wrong😐',
-      );
-    }).whenComplete(
-      () => setState(() => isLoading = false),
-    );
+  void onViewModelReady(LoginVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  LoginVM viewModelBuilder(BuildContext context) {
+    return LoginVM(email: email);
+  }
+
+  @override
+  Widget builder(BuildContext context, LoginVM viewModel, Widget? child) {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -112,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                     topRight: Radius.circular(40.0)),
               ),
               child: Form(
-                key: formKey,
+                key: viewModel.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -124,14 +84,14 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20.0),
                     AppTextField(
-                      controller: emailController,
+                      controller: viewModel.emailController,
                       labelText: 'Username/Email',
                       textInputAction: TextInputAction.next,
                       validator: Validator.required,
                     ),
                     const SizedBox(height: 20.0),
                     AppTextFieldPassword(
-                      controller: passwordController,
+                      controller: viewModel.passwordController,
                       labelText: 'Password',
                       textInputAction: TextInputAction.done,
                       validator: Validator.password,
@@ -158,8 +118,8 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 40.0),
                     AppElevatedButton(
                       text: 'Login',
-                      isDisable: isLoading,
-                      onPressed: () => _submitLogin(context),
+                      isDisable: viewModel.isLoading,
+                      onPressed: () => viewModel.submitLogin(context),
                     ),
                     const Spacer(),
                     Row(

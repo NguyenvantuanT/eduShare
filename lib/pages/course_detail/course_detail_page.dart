@@ -1,164 +1,39 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/mv_simmer.dart';
-import 'package:chat_app/models/comment_model.dart';
-import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
-import 'package:chat_app/models/user_model.dart';
+import 'package:chat_app/pages/course_detail/course_detail_vm.dart';
 import 'package:chat_app/pages/course_detail/widgets/comment_card.dart';
 import 'package:chat_app/pages/course_detail/widgets/course_button.dart';
 import 'package:chat_app/pages/course_detail/widgets/quiz_card.dart';
-import 'package:chat_app/pages/create_todo/create_todo_page.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
 import 'package:chat_app/pages/quiz/quiz_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
-import 'package:chat_app/services/remote/comment_services.dart';
-import 'package:chat_app/services/remote/course_services.dart';
-import 'package:chat_app/services/remote/learning_progress_services.dart';
-import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:readmore/readmore.dart';
+import 'package:stacked/stacked.dart';
 
-class CourseDetailPage extends StatefulWidget {
+class CourseDetailPage extends StackedView<CourseDetailVM> {
   const CourseDetailPage(this.docId, {super.key, this.onUpdate});
 
   final String docId;
   final VoidCallback? onUpdate;
-
+  
   @override
-  State<CourseDetailPage> createState() => _CourseDetailPageState();
-}
-
-class _CourseDetailPageState extends State<CourseDetailPage> {
-  LearningProgressServices learProgServices = LearningProgressServices();
-  TextEditingController commentController = TextEditingController();
-  Map<String, double> lessonProgress = {};
-  CourseServices courseServices = CourseServices();
-  LessonServices lessonServices = LessonServices();
-  CommentServices commentServices = CommentServices();
-  CourseModel course = CourseModel();
-  UserModel user = SharedPrefs.user ?? UserModel();
-  List<LessonModel> lessons = [];
-  List<CommentModel> comments = [];
-  bool isFavorite = false;
-  bool isLearning = false;
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    getCourse();
-  }
-
-  void getCourse() {
-    setState(() => isLoading = true);
-    courseServices
-        .getCourse(widget.docId)
-        .then((value) {
-          course = value;
-          isFavorite = (course.favorites ?? []).contains(user.email);
-          isLearning = (course.learnings ?? []).contains(user.email);
-
-          Future.wait([
-            lessonServices.getLessons(widget.docId),
-            commentServices.getComments(widget.docId)
-          ]).then((results) {
-            lessons = results[0] as List<LessonModel>;
-            comments = results[1] as List<CommentModel>;
-            getProgress();
-            setState(() => isLoading = false);
-          });
-        })
-        .catchError((error) {})
-        .whenComplete(() => setState(() => isLoading = false));
-  }
-
-  void getProgress() {
-    for (var lesson in lessons) {
-      learProgServices
-          .getLessonProgress(
-              docIdCourse: widget.docId, lessonId: lesson.lessonId)
-          .then((value) {
-        setState(() {
-          lessonProgress[lesson.lessonId ?? ""] = value?.progress ?? 0.0;
-        });
-      });
-    }
-  }
-
-  void toggleFavorite(BuildContext context) {
-    setState(() => isFavorite = !isFavorite);
-    courseServices.toggleFavorite(course, isFavorite).then((_) {
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-          context: context,
-          icon: Icons.favorite,
-          iconColor: isFavorite ? AppColor.blue : null,
-          text:
-              'Course has been ${isFavorite ? 'add' : 'remote'} your favorites 😍',
-          color: AppColor.bgColor.withOpacity(0.8));
-      setState(() {});
-    }).catchError((onError) {});
-  }
-
-  void toggleLearning(BuildContext context) {
-    setState(() => isLearning = !isLearning);
-    courseServices.toggleLearning(course, isLearning).then((_) {
-      widget.onUpdate?.call();
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        icon: Icons.book,
-        iconColor: isLearning ? AppColor.blue : null,
-        text:
-            'Course has been ${isLearning ? 'added to' : 'removed from'} your learning 😍',
-        color: AppColor.bgColor.withOpacity(0.8),
-      );
-      setState(() {});
-    }).catchError((onError) {
-      debugPrint("Error: $onError");
-    });
-  }
-
-  void createComment() {
-    CommentModel comment = CommentModel()
-      ..avatar = user.avatar ?? ""
-      ..name = user.name ?? ""
-      ..comment = commentController.text.trim();
-    commentServices.createComment(widget.docId, comment).then((value) {
-      comments.add(value);
-      commentController.clear();
-      setState(() {});
-    });
-  }
-
-  void updateRating(CommentModel comment, double rating) {
-    commentServices
-        .updateComment(widget.docId, comment..rating = rating)
-        .then((_) {
-      widget.onUpdate?.call();
-      commentServices.getRating(widget.docId).then((courseRating) {
-        comments.singleWhere((e) => e.commentId == comment.commentId).rating =
-            rating;
-        setState(() {});
-      });
-    });
-  }
-
-  void addCourseTodo() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateTodoPage(title: course.name),
-        ));
+  void onViewModelReady(CourseDetailVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  CourseDetailVM viewModelBuilder(BuildContext context) =>
+      CourseDetailVM(docId, onUpdate: onUpdate);
+
+  @override
+  Widget builder(
+      BuildContext context, CourseDetailVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       body: ListView(
@@ -166,7 +41,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           Stack(
             children: [
               CachedNetworkImage(
-                imageUrl: course.imageCourse ?? "",
+                imageUrl: viewModel.course.imageCourse ?? "",
                 fit: BoxFit.cover,
                 height: 200.0,
                 width: double.maxFinite,
@@ -225,14 +100,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          course.name ?? "",
+                          viewModel.course.name ?? "",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.STYLE_18
                               .copyWith(color: AppColor.textColor),
                         ),
                         Text(
-                          course.createBy ?? "",
+                          viewModel.course.createBy ?? "",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.STYLE_14
@@ -251,7 +126,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                             const BorderRadius.all(Radius.circular(8.0)),
                       ),
                       child: Text(
-                        course.category ?? "",
+                        viewModel.course.category ?? "",
                         style:
                             AppStyles.STYLE_14.copyWith(color: AppColor.blue),
                       ),
@@ -262,12 +137,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   children: [
                     CourseButton(
                       text: "Add to lear",
-                      onTap: () => toggleLearning(context),
-                      isLearning: isLearning,
+                      onTap: () => viewModel.toggleLearning(context),
+                      isLearning: viewModel.isLearning,
                     ),
                     GestureDetector(
-                      onTap: () => toggleFavorite(context),
-                      child: isFavorite
+                      onTap: () => viewModel.toggleFavorite(context),
+                      child: viewModel.isFavorite
                           ? const Icon(
                               Icons.favorite,
                               color: AppColor.blue,
@@ -280,7 +155,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     const Spacer(),
                     CourseButton(
                       text: "Add to Todo",
-                      onTap: () => addCourseTodo(),
+                      onTap: () => viewModel.addCourseTodo(context),
                       icon: AppImages.iconTodo,
                     ),
                   ],
@@ -292,7 +167,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 ),
                 const SizedBox(height: 15.0),
                 ReadMoreText(
-                  course.description ?? "",
+                  viewModel.course.description ?? "",
                   trimLines: 3,
                   trimMode: TrimMode.Line,
                   trimCollapsedText: " Read more",
@@ -312,12 +187,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 20.0),
-                  itemCount: lessons.length,
+                  itemCount: viewModel.lessons.length,
                   separatorBuilder: (_, __) =>
                       Divider(color: AppColor.greyText.withOpacity(0.5)),
                   itemBuilder: (context, idx) {
-                    final lesson = lessons[idx];
-                    return _buildLessonCard(context, idx, lesson);
+                    final lesson = viewModel.lessons[idx];
+                    return _buildLessonCard(context,
+                        idx: idx, lesson: lesson, viewModel: viewModel);
                   },
                 ),
                 const Divider(color: AppColor.blue),
@@ -325,7 +201,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 QuizCard(
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => QuizPage(
-                            couseId: widget.docId,
+                            couseId: docId,
                           ),
                         ))),
                 const SizedBox(height: 25.0),
@@ -335,20 +211,20 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       .copyWith(color: AppColor.textColor),
                 ),
                 const SizedBox(height: 15.0),
-                _buildTextFieldDes(),
+                _buildTextFieldDes(viewModel),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.only(top: 20.0, bottom: 50.0),
-                  itemCount: comments.length,
+                  itemCount: viewModel.comments.length,
                   separatorBuilder: (_, __) =>
                       Divider(color: AppColor.greyText.withOpacity(0.5)),
                   itemBuilder: (context, idx) {
-                    final comment = comments[idx];
+                    final comment = viewModel.comments[idx];
                     return CommentCard(
                       comment,
                       onRatingUpdate: (rating) {
-                        updateRating(comment, rating);
+                        viewModel.updateRating(comment, rating);
                       },
                     );
                   },
@@ -361,20 +237,20 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  TextField _buildTextFieldDes() {
+  TextField _buildTextFieldDes(CourseDetailVM viewModel) {
     OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
           borderSide: BorderSide(color: color, width: 1.2),
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
         );
     return TextField(
       maxLines: 2,
-      controller: commentController,
+      controller: viewModel.commentController,
       decoration: InputDecoration(
           border: outlineInputBorder(AppColor.grey),
           focusedBorder: outlineInputBorder(AppColor.grey),
           hintText: 'Your comment..',
           suffixIcon: InkWell(
-              onTap: createComment,
+              onTap: viewModel.createComment,
               child: const Icon(
                 Icons.send,
                 color: AppColor.blue,
@@ -386,16 +262,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  Widget _buildLessonCard(BuildContext context, int idx, LessonModel lesson) {
-    final progress = lessonProgress[lesson.lessonId ?? ""] ?? 0.0;
+  Widget _buildLessonCard(BuildContext context,
+      {required int idx,
+      required LessonModel lesson,
+      required CourseDetailVM viewModel}) {
+    final progress = viewModel.lessonProgress[lesson.lessonId ?? ""] ?? 0.0;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => LessonPage(
-            docIdCourse: widget.docId,
+            docIdCourse: docId,
             index: idx,
-            updateProg: getProgress,
+            updateProg: viewModel.getProgress,
           ),
         ),
       ),
