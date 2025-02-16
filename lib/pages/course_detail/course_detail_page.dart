@@ -6,7 +6,9 @@ import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/course_detail/widgets/comment_card.dart';
+import 'package:chat_app/pages/course_detail/widgets/course_button.dart';
 import 'package:chat_app/pages/course_detail/widgets/quiz_card.dart';
+import 'package:chat_app/pages/create_todo/create_todo_page.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
 import 'package:chat_app/pages/quiz/quiz_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -147,6 +149,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     });
   }
 
+  void addCourseTodo() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreateTodoPage(title: course.name),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,28 +260,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 ),
                 Row(
                   children: [
-                    GestureDetector(
+                    CourseButton(
+                      text: "Add to lear",
                       onTap: () => toggleLearning(context),
-                      child: Container(
-                        height: 30.0,
-                        margin: const EdgeInsets.symmetric(vertical: 15.0)
-                            .copyWith(right: 10.0),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                        decoration: BoxDecoration(
-                          color: AppColor.blue.withOpacity(0.25),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8.0)),
-                        ),
-                        child: Text(
-                          "Add to lear",
-                          style: AppStyles.STYLE_14.copyWith(
-                              color: isLearning
-                                  ? AppColor.blue
-                                  : AppColor.greyText),
-                        ),
-                      ),
+                      isLearning: isLearning,
                     ),
                     GestureDetector(
                       onTap: () => toggleFavorite(context),
@@ -284,6 +276,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               Icons.favorite_outline,
                               color: AppColor.greyText,
                             ),
+                    ),
+                    const Spacer(),
+                    CourseButton(
+                      text: "Add to Todo",
+                      onTap: () => addCourseTodo(),
+                      icon: AppImages.iconTodo,
                     ),
                   ],
                 ),

@@ -22,7 +22,7 @@ class QuizServices extends QuizServicesImpl {
   }
 
   @override
-  Future<List<QuizModel>> getQuizs(String couseId) async {
+  Future<List<QuizModel>?> getQuizs(String couseId) async {
     QuerySnapshot<Map<String, dynamic>> data =
         await courseCollection.doc(couseId).collection(quiz).get();
 

@@ -153,17 +153,7 @@ class _TodoPageState extends State<TodoPage> {
         AppElevatedButton(
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => CreateTodoPage(
-                onCreate: (todo) {
-                  String path =
-                      "${selectDate.year}-${selectDate.month}-${selectDate.day}";
-                  todo.dateCreate = path;
-                  todoServices.createTodo(todo).then((value) {
-                    todos = [...todos, value];
-                    setState(() {});
-                  });
-                },
-              ),
+              builder: (context) => const CreateTodoPage(),
             ),
           ),
           height: 40,

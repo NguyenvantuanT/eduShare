@@ -75,7 +75,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
   }
 
   void getQuizs() async {
-    quizs = await quizServices.getQuizs(widget.docId);
+    quizs = await quizServices.getQuizs(widget.docId) ?? [];
     setState(() {});
   }
 

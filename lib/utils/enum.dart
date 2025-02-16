@@ -8,3 +8,9 @@ enum CategoryType {
   Design,
   Language,
 }
+
+enum DatePickerType {
+  date,
+  hour,
+  minute,
+}

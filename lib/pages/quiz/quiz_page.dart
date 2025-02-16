@@ -35,7 +35,7 @@ class _QuizPageState extends State<QuizPage> {
   void getQuizs() {
     setState(() => isLoading = true);
     quizServices.getQuizs(widget.couseId).then((value) {
-      quizs = value;
+      quizs = value ?? [];
       setState(() => isLoading = false);
     });
   }
@@ -48,7 +48,6 @@ class _QuizPageState extends State<QuizPage> {
       selectOtion = index;
       if (isCorrect) {
         score++;
-        print(score);
       }
     });
   }
@@ -83,53 +82,62 @@ class _QuizPageState extends State<QuizPage> {
               child: CircularProgressIndicator(
               color: AppColor.blue,
             ))
-          : Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 10.0,
-              ),
-              child: Column(
-                children: [
-                  LinearProgressIndicator(
-                    value: (currentIndex + 1) / quizs.length,
-                    backgroundColor: AppColor.grey,
-                    color: AppColor.blue,
-                    minHeight: 8,
+          : quizs.isEmpty
+              ? Center(
+                  child: Text(
+                  "No Quiz yey!",
+                  style: AppStyles.STYLE_20.copyWith(color: AppColor.blue),
+                ))
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 10.0,
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 20.0),
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15.0),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: AppShadow.boxShadowContainer,
-                    ),
-                    child: Text(
-                      quizs[currentIndex].question ?? '',
-                      textAlign: TextAlign.center,
-                      style: AppStyles.STYLE_14.copyWith(color: AppColor.blue),
-                    ),
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: (currentIndex + 1) / quizs.length,
+                        backgroundColor: AppColor.grey,
+                        color: AppColor.blue,
+                        minHeight: 8,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 20.0),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(15.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: AppShadow.boxShadowContainer,
+                        ),
+                        child: Text(
+                          quizs[currentIndex].question ?? '',
+                          textAlign: TextAlign.center,
+                          style:
+                              AppStyles.STYLE_14.copyWith(color: AppColor.blue),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: (quizs[currentIndex].options ?? []).length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 15.0),
+                          itemBuilder: (context, index) {
+                            return _buildOption(index);
+                          },
+                        ),
+                      ),
+                      if (hasAnswered)
+                        AppElevatedButton(
+                          onPressed: nextQuestion,
+                          text: currentIndex == quizs.length - 1
+                              ? 'Finish'
+                              : 'Next',
+                        ),
+                      const SizedBox(height: 200.0),
+                    ],
                   ),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: (quizs[currentIndex].options ?? []).length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 15.0),
-                      itemBuilder: (context, index) {
-                        return _buildOption(index);
-                      },
-                    ),
-                  ),
-                  if (hasAnswered)
-                    AppElevatedButton(
-                      onPressed: nextQuestion,
-                      text:
-                          currentIndex == quizs.length - 1 ? 'Finish' : 'Next',
-                    ),
-                  const SizedBox(height: 200.0),
-                ],
-              ),
-            ),
+                ),
     );
   }
 
