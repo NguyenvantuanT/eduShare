@@ -33,7 +33,7 @@ class LessonVM extends BaseViewModel {
     getVideo();
   }
 
-  void changeLesson() {
+  void changeLesson(int index) {
     lessonIndex = index;
     lesson = lessons[lessonIndex];
     controller?.load(lesson.videoPath!);
