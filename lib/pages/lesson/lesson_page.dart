@@ -240,7 +240,7 @@ class LessonPage extends StackedView<LessonVM> {
       children: List.generate(
         viewModel.lessons.length,
         (index) => GestureDetector(
-          onTap: viewModel.changeLesson,
+          onTap: () =>  viewModel.changeLesson(index),
           child: Container(
             height: 50.0,
             margin: const EdgeInsets.only(top: 20.0),
