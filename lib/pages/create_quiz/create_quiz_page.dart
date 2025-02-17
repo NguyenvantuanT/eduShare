@@ -1,63 +1,30 @@
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/models/quiz_model.dart';
+import 'package:chat_app/pages/create_quiz/create_quiz_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/quiz_services.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
 
-class CreateQuizPage extends StatefulWidget {
+class CreateQuizPage extends StackedView<CreateQuizVM> {
   const CreateQuizPage({super.key, required this.courseId, this.onUpdate});
 
   final String courseId;
   final Function()? onUpdate;
 
   @override
-  State<CreateQuizPage> createState() => _CreateQuizPageState();
-}
-
-class _CreateQuizPageState extends State<CreateQuizPage> {
-  final questionController = TextEditingController();
-  final optionOneController = TextEditingController();
-  final optionTwoController = TextEditingController();
-  final optionThreeController = TextEditingController();
-  final optionFourController = TextEditingController();
-  final optionCorrectController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  QuizServices quizServices = QuizServices();
-
-  void createQuiz(BuildContext context) {
-    List<String>? options = [
-      optionOneController.text.trim(),
-      optionTwoController.text.trim(),
-      optionThreeController.text.trim(),
-      optionFourController.text.trim(),
-    ];
-    QuizModel quizModel = QuizModel(
-      question: questionController.text.trim(),
-      correctOption: optionCorrectController.text.trim(),
-      options: options,
-    );
-
-    print(quizModel.toJson());
-
-    quizServices.createQuiz(widget.courseId, quizModel).then((value) {
-      widget.onUpdate?.call();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        return Navigator.of(context).pop();
-      });
-    });
-  }
+  CreateQuizVM viewModelBuilder(BuildContext context) =>
+      CreateQuizVM(courseId: courseId, onUpdate: onUpdate);
 
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, CreateQuizVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: const AppTabBarBlue(title: 'Create Quiz'),
       body: Form(
-        key: formKey,
+        key: viewModel.formKey,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           children: [
@@ -68,7 +35,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: questionController,
+              controller: viewModel.questionController,
               labelText: "Write question?",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -81,7 +48,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: optionOneController,
+              controller: viewModel.optionOneController,
               labelText: "One...",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -94,7 +61,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: optionTwoController,
+              controller: viewModel.optionTwoController,
               labelText: "Two...",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -107,7 +74,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: optionThreeController,
+              controller: viewModel.optionThreeController,
               labelText: "Three...",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -120,7 +87,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: optionFourController,
+              controller: viewModel.optionFourController,
               labelText: "Four...",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -133,7 +100,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
-              controller: optionCorrectController,
+              controller: viewModel.optionCorrectController,
               labelText: "Correct...",
               textInputAction: TextInputAction.next,
               validator: Validator.required,
@@ -143,7 +110,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 widthFactor: 0.5,
                 child: AppElevatedButton(
                   text: "Create Quiz",
-                  onPressed: () => createQuiz(context),
+                  onPressed: () => viewModel.createQuiz(context),
                 ))
           ],
         ),
@@ -151,3 +118,4 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
     );
   }
 }
+

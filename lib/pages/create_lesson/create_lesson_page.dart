@@ -1,66 +1,27 @@
-import 'dart:io';
 
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/pages/create_lesson/create_lesson_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/lesson_services.dart';
-import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
 
-class MakeLessonPage extends StatefulWidget {
-  const MakeLessonPage({super.key, this.onUpdate, required this.docIdCourse});
+class CreateLessonPage extends StackedView<CreateLessonVM> {
+  const CreateLessonPage({super.key, this.onUpdate, required this.docIdCourse});
 
   final Function()? onUpdate;
   final String docIdCourse;
 
   @override
-  State<MakeLessonPage> createState() => _MakeLessonPageState();
-}
-
-class _MakeLessonPageState extends State<MakeLessonPage> {
-  final nameLessonsController = TextEditingController();
-  final describeController = TextEditingController();
-  final videoPathController = TextEditingController();
-  StorageServices storageServices = StorageServices();
-  LessonServices lessonServices = LessonServices();
-  File? file;
-
-  Future<void> pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'],
-    );
-    if (result == null) return;
-    file = File(result.files.single.path!);
-    setState(() {});
-  }
-
-  void createLesson(BuildContext context) async {
-    String fileName = file!.path.split('/').last;
-    LessonModel lesson = LessonModel()
-      ..id = '${DateTime.now().millisecondsSinceEpoch}'
-      ..name = nameLessonsController.text.trim()
-      ..description = describeController.text.trim()
-      ..videoPath = videoPathController.text.trim()
-      ..fileName = fileName
-      ..filePath = file != null
-          ? await storageServices.postFile(fileName: fileName, file: file!)
-          : null;
-    widget.onUpdate?.call();
-    lessonServices.createLesson(widget.docIdCourse, lesson).then((_) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-    });
-  }
+  CreateLessonVM viewModelBuilder(BuildContext context) =>
+      CreateLessonVM(docIdCourse: docIdCourse, onUpdate: onUpdate);
 
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, CreateLessonVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: const AppTabBarBlue(title: 'Add Lesson'),
@@ -73,7 +34,7 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
           ),
           const SizedBox(height: 10.0),
           AppTextField(
-            controller: nameLessonsController,
+            controller: viewModel.nameLessonsController,
             labelText: "e.g., lesson ...",
             textInputAction: TextInputAction.next,
             validator: Validator.required,
@@ -84,7 +45,7 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
             style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
           ),
           const SizedBox(height: 10.0),
-          buildTextFieldDes(describeController),
+          buildTextFieldDes(viewModel.describeController),
           const SizedBox(height: 20.0),
           Text(
             'Link Video?',
@@ -92,7 +53,7 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
           ),
           const SizedBox(height: 10.0),
           AppTextField(
-            controller: videoPathController,
+            controller: viewModel.videoPathController,
             labelText: "e.g., path ...",
             textInputAction: TextInputAction.done,
             validator: Validator.required,
@@ -111,7 +72,7 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
             'Upload File?',
             style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
           ),
-          if (file != null) ...[
+          if (viewModel.file != null) ...[
             Container(
               margin: const EdgeInsets.only(top: 10.0),
               decoration: const BoxDecoration(
@@ -127,9 +88,9 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
                     style: AppStyles.STYLE_14_BOLD
                         .copyWith(color: AppColor.textColor),
                   ),
-                  Text(file!.path.split('/').last),
+                  Text(viewModel.file!.path.split('/').last),
                   Text(
-                    'Size: ${(file!.lengthSync() / 1024).toStringAsFixed(2)} KB',
+                    'Size: ${(viewModel.file!.lengthSync() / 1024).toStringAsFixed(2)} KB',
                   ),
                 ],
               ),
@@ -139,12 +100,12 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
           const SizedBox(height: 10.0),
           AppElevatedButton.outline(
             text: "Enter to chose file",
-            onPressed: pickFile,
+            onPressed: viewModel.pickFile,
           ),
           const SizedBox(height: 20.0),
           AppElevatedButton(
             text: 'Save',
-            onPressed: () => createLesson(context),
+            onPressed: () => viewModel.createLesson(context),
           ),
         ],
       ),
@@ -171,3 +132,4 @@ class _MakeLessonPageState extends State<MakeLessonPage> {
     );
   }
 }
+

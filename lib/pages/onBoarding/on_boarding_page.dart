@@ -1,31 +1,20 @@
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/onboarding_model.dart';
-import 'package:chat_app/pages/auth/login_page.dart';
+import 'package:chat_app/pages/onBoarding/on_boarding_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stacked/stacked.dart';
 
-class OnBoardingPage extends StatefulWidget {
+class OnBoardingPage extends StackedView<OnBoardingVm> {
   const OnBoardingPage({super.key});
 
   @override
-  State<OnBoardingPage> createState() => _OnBoardingPageState();
-}
-
-class _OnBoardingPageState extends State<OnBoardingPage> {
-  final pageController = PageController();
-  int currentIndex = 0;
+  OnBoardingVm viewModelBuilder(BuildContext context) => OnBoardingVm();
 
   @override
-  void initState() {
-    super.initState();
-    SharedPrefs.isAccessed = true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, OnBoardingVm viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       body: Padding(
@@ -38,11 +27,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             SizedBox(
               height: 240.0,
               child: PageView(
-                controller: pageController,
-                onPageChanged: (pageViewIndex) {
-                  currentIndex = pageViewIndex;
-                  setState(() {});
-                },
+                controller: viewModel.pageController,
+                onPageChanged: viewModel.changePage,
                 children: List.generate(
                   onboardings.length,
                   (idx) => SvgPicture.asset(onboardings[idx].imagePath ?? "",
@@ -52,9 +38,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             ),
             Container(
               height: 80.0,
-              margin: const EdgeInsets.only(top: 20.0,bottom: 20.0),
+              margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
               child: Text(
-                onboardings[currentIndex].text ?? "",
+                onboardings[viewModel.currentIndex].text ?? "",
                 textAlign: TextAlign.center,
                 style: AppStyles.STYLE_14,
               ),
@@ -66,10 +52,12 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 4.6),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    width: idx == currentIndex ? 30.0 : 10.0,
+                    width: idx == viewModel.currentIndex ? 30.0 : 10.0,
                     height: 10.0,
                     decoration: BoxDecoration(
-                        color: idx == currentIndex ? AppColor.blue : Colors.grey,
+                        color: idx == viewModel.currentIndex
+                            ? AppColor.blue
+                            : Colors.grey,
                         borderRadius: BorderRadius.circular(20.0)),
                   ),
                 );
@@ -77,21 +65,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
             ),
             const Spacer(),
             AppElevatedButton(
-              text: currentIndex == onboardings.length - 1 ? 'Start' : 'Next',
-              onPressed: () {
-                if (currentIndex < onboardings.length - 1) {
-                  currentIndex++;
-                  pageController.jumpToPage(currentIndex);
-                } else {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
-                }
-              },
-            )
+                text: viewModel.currentIndex == onboardings.length - 1
+                    ? 'Start'
+                    : 'Next',
+                onPressed: () => viewModel.onPressed(context))
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:chat_app/pages/course/course_page.dart';
 import 'package:chat_app/pages/favorite/favorite_page.dart';
 import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/learning/learning_page.dart';
+import 'package:chat_app/pages/main_vm.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
 import 'package:chat_app/pages/todo/todo_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -10,28 +11,22 @@ import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stacked/stacked.dart';
 
-class MainPage extends StatefulWidget {
+class MainPage extends StackedView<MainVM> {
   const MainPage({super.key, this.index});
 
   final int? index;
 
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  late int selectedIndex;
-
-  List<Widget> pages = const [
+  static const pages = [
     HomePage(),
     TodoPage(),
     LearningPage(),
     FavoritePage(),
-    MyCoursePage(),
+    CoursePage(),
   ];
 
-  List<String> lables = [
+  static const lables = [
     'Home',
     'Todo',
     'Learning',
@@ -39,7 +34,7 @@ class _MainPageState extends State<MainPage> {
     'Course',
   ];
 
-  List<String> icons = [
+  static const icons = [
     AppImages.iconHome,
     AppImages.iconTodo,
     AppImages.iconBriefCase,
@@ -48,13 +43,18 @@ class _MainPageState extends State<MainPage> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    selectedIndex = widget.index ?? 0;
+  void onViewModelReady(MainVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  MainVM viewModelBuilder(BuildContext context) {
+    return MainVM(index: index);
+  }
+
+  @override
+  Widget builder(BuildContext context, MainVM viewModel, Widget? child) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -66,36 +66,29 @@ class _MainPageState extends State<MainPage> {
           title: 'What do you want to learn today?',
           avatar: SharedPrefs.user?.avatar ?? '',
         ),
-        body: pages[selectedIndex],
-        bottomNavigationBar: _buildBottomNavigationBar(),
+        body: pages[viewModel.selectedIndex],
+        bottomNavigationBar: _buildBottomNavigationBar(viewModel),
       ),
     );
   }
 
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(MainVM viewModel) {
     return AnimatedContainer(
       height: 52.0,
       duration: const Duration(milliseconds: 2000),
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).padding.bottom,
-      ),
       child: Row(
         children: List.generate(
           lables.length,
-          (index) => Expanded(child: _navigationItem(index)),
+          (index) => Expanded(child: _navigationItem(index, viewModel)),
         ),
       ),
     );
   }
 
-  Widget _navigationItem(int index) {
+  Widget _navigationItem(int index, MainVM viewModel) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        setState(() {
-          selectedIndex = index;
-        });
-      },
+      onTap: () => viewModel.changePage(index),
       child: Container(
         decoration: const BoxDecoration(color: AppColor.bgColor),
         child: Column(
@@ -103,12 +96,16 @@ class _MainPageState extends State<MainPage> {
           children: [
             SvgPicture.asset(
               icons[index],
-              color: index == selectedIndex ? AppColor.blue : AppColor.grey,
+              color: index == viewModel.selectedIndex
+                  ? AppColor.blue
+                  : AppColor.grey,
             ),
             Text(
               lables[index],
               style: TextStyle(
-                color: index == selectedIndex ? AppColor.blue : AppColor.grey,
+                color: index == viewModel.selectedIndex
+                    ? AppColor.blue
+                    : AppColor.grey,
                 fontSize: 12.0,
               ),
             ),

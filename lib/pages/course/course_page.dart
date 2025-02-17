@@ -3,7 +3,7 @@ import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/pages/edit_course/edit_course_page.dart';
-import 'package:chat_app/pages/create_course/make_course_page.dart';
+import 'package:chat_app/pages/create_course/create_course_page.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -14,14 +14,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class MyCoursePage extends StatefulWidget {
-  const MyCoursePage({super.key});
+class CoursePage extends StatefulWidget {
+  const CoursePage({super.key});
 
   @override
-  State<MyCoursePage> createState() => _MyCoursePageState();
+  State<CoursePage> createState() => _CoursePageState();
 }
 
-class _MyCoursePageState extends State<MyCoursePage> {
+class _CoursePageState extends State<CoursePage> {
   CourseServices courseServices = CourseServices();
   List<CourseModel> courses = [];
   String email = SharedPrefs.user?.email ?? "";
@@ -129,7 +129,7 @@ class _MyCoursePageState extends State<MyCoursePage> {
         child: AppElevatedButton(
           text: 'Make Your Course',
           onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const MakeCoursePage()),
+            MaterialPageRoute(builder: (context) => const CreateCoursePage()),
           ),
         ),
       ),

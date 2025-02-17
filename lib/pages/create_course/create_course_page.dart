@@ -1,87 +1,25 @@
-import 'dart:io';
 
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
-import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/pages/main_page.dart';
+import 'package:chat_app/pages/create_course/create_course_vm.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
-import 'package:chat_app/services/remote/course_services.dart';
-import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/enum.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:stacked/stacked.dart';
 
-class MakeCoursePage extends StatefulWidget {
-  const MakeCoursePage({super.key});
-
-  @override
-  State<MakeCoursePage> createState() => _MakeCoursePageState();
-}
-
-class _MakeCoursePageState extends State<MakeCoursePage> {
-  final nameCourseController = TextEditingController();
-  final categoryController = TextEditingController();
-  final describeController = TextEditingController();
-  ImagePicker picker = ImagePicker();
-  final formKey = GlobalKey<FormState>();
-  CourseServices courseServices = CourseServices();
-  StorageServices storageServices = StorageServices();
-  File? imageCourse;
-  bool isLoading = false;
-  bool showMenu = false;
-
-  Future<void> pickImageCourse() async {
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-    if (file == null) return;
-    setState(() => imageCourse = File(file.path));
-  }
-
-  Future<void> _addCourse(BuildContext context) async {
-    if (formKey.currentState?.validate() == false) return;
-    setState(() => isLoading = true);
-
-    CourseModel course = CourseModel()
-      ..id = '${DateTime.now().millisecondsSinceEpoch}'
-      ..name = nameCourseController.text.trim()
-      ..createBy = SharedPrefs.user?.email ?? ""
-      ..category = categoryController.text.trim()
-      ..description = describeController.text.trim()
-      ..imageCourse = imageCourse != null
-          ? await storageServices.post(image: imageCourse!)
-          : null;
-
-    courseServices.createCourse(course).then((_) {
-      if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => const MainPage(index: 4),
-        ),
-        (route) => false,
-      );
-      DelightToastShow.showToast(
-          context: context, text: 'Your course is create😐', icon: Icons.check);
-    }).catchError((onError) {
-      debugPrint("Failed to post: $onError");
-    }).whenComplete(() => setState(() => isLoading = false));
-  }
+class CreateCoursePage extends StackedView<CreateCourseVM> {
+  const CreateCoursePage({super.key});
 
   @override
-  void dispose() {
-    super.dispose();
-    nameCourseController.dispose();
-    categoryController.dispose();
-    describeController.dispose();
-  }
-
+  CreateCourseVM viewModelBuilder(BuildContext context) => CreateCourseVM();
+  
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, CreateCourseVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       body: ListView(
@@ -109,7 +47,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Form(
-              key: formKey,
+              key: viewModel.formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -120,7 +58,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                   ),
                   const SizedBox(height: 10.0),
                   AppTextField(
-                    controller: nameCourseController,
+                    controller: viewModel.nameCourseController,
                     labelText: "e.g., how to ...",
                     textInputAction: TextInputAction.next,
                     validator: Validator.required,
@@ -134,14 +72,14 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                   const SizedBox(height: 10.0),
                   AppTextField(
                     readOnly: true,
-                    onTap: () => setState(() => showMenu = !showMenu),
-                    controller: categoryController,
+                    onTap: viewModel.showBotMenu,
+                    controller: viewModel.categoryController,
                     hintText: "e.g., biology",
                     hintTextColor: AppColor.textColor,
                     textInputAction: TextInputAction.next,
                     validator: Validator.required,
                   ),
-                  if (showMenu)
+                  if (viewModel.showMenu)
                     Container(
                       decoration: BoxDecoration(
                         color: AppColor.bgColor,
@@ -153,9 +91,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                             List.generate(CategoryType.values.length, (idx) {
                           final category = CategoryType.values[idx];
                           return InkWell(
-                              onTap: () => setState(() {
-                                    categoryController.text = category.name;
-                                  }),
+                              onTap: () => viewModel.pickCategory(category),
                               child: Container(
                                 height: 30.0,
                                 margin: const EdgeInsets.symmetric(
@@ -163,13 +99,13 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                     color:
-                                        categoryController.text == category.name
+                                        viewModel.categoryController.text == category.name
                                             ? AppColor.blue
                                             : null),
                                 child: Text(
                                   category.name,
                                   style: AppStyles.STYLE_14.copyWith(
-                                      color: categoryController.text ==
+                                      color: viewModel.categoryController.text ==
                                               category.name
                                           ? AppColor.bgColor
                                           : AppColor.textColor),
@@ -185,14 +121,14 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                         .copyWith(color: AppColor.textColor),
                   ),
                   const SizedBox(height: 10.0),
-                  _buildTextFieldDes(),
+                  _buildTextFieldDes(viewModel),
                   const SizedBox(height: 10.0),
-                  _buildSelectImage(),
+                  _buildSelectImage(viewModel),
                   const SizedBox(height: 50.0),
                   AppElevatedButton(
-                    isDisable: isLoading,
+                    isDisable: viewModel.isLoading,
                     text: 'Make Course',
-                    onPressed: () => _addCourse(context),
+                    onPressed: () => viewModel.addCourse(context),
                   ),
                 ],
               ),
@@ -202,15 +138,15 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
       ),
     );
   }
-
-  TextField _buildTextFieldDes() {
+  
+  TextField _buildTextFieldDes(CreateCourseVM viewModel) {
     OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
           borderSide: BorderSide(color: color, width: 1.2),
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
         );
     return TextField(
       maxLines: 5,
-      controller: describeController,
+      controller: viewModel.describeController,
       decoration: InputDecoration(
           border: outlineInputBorder(AppColor.grey),
           focusedBorder: outlineInputBorder(AppColor.grey),
@@ -221,7 +157,7 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
     );
   }
 
-  Widget _buildSelectImage() {
+  Widget _buildSelectImage(CreateCourseVM viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,16 +177,16 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
                 border: Border.all(color: AppColor.blue),
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(
-                  image: imageCourse == null
+                  image: viewModel.imageCourse == null
                       ? Image.asset(AppImages.imageLogoPng).image
-                      : FileImage(imageCourse!),
+                      : FileImage(viewModel.imageCourse!),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             const SizedBox(width: 10.0),
             GestureDetector(
-              onTap: pickImageCourse,
+              onTap: viewModel.pickImageCourse,
               child: Container(
                   height: 60.0,
                   width: 60.0,
@@ -267,4 +203,6 @@ class _MakeCoursePageState extends State<MakeCoursePage> {
       ],
     );
   }
+  
 }
+
