@@ -1,18 +1,16 @@
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
-import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/pages/lesson/lesson_vm.dart';
 import 'package:chat_app/pages/pdf/PDF_viewer_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
-import 'package:chat_app/services/remote/learning_progress_services.dart';
-import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:stacked/stacked.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-class LessonPage extends StatefulWidget {
+class LessonPage extends StackedView<LessonVM> {
   const LessonPage({
     super.key,
     required this.docIdCourse,
@@ -20,131 +18,42 @@ class LessonPage extends StatefulWidget {
     this.updateProg,
   });
 
+  @override
+  void onViewModelReady(LessonVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
+  }
+
   final String docIdCourse;
   final int index;
   final VoidCallback? updateProg;
 
   @override
-  State<LessonPage> createState() => _LessonPageState();
-}
-
-class _LessonPageState extends State<LessonPage> {
-  LearningProgressServices learProgServices = LearningProgressServices();
-  LearningProgressModel learProg = LearningProgressModel();
-  LessonServices lessonServices = LessonServices();
-
-  YoutubePlayerController? controller;
-  LessonModel lesson = LessonModel();
-  List<LessonModel> lessons = [];
-
-  late int lessonIndex;
-  String email = SharedPrefs.user?.email ?? '';
-
-  List<String> tabNames = ['Information', 'Lessons'];
-  int selectIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    lessonIndex = widget.index;
-    getVideo();
-  }
-
-  void getProgress() {
-    learProgServices
-        .getLessonProgress(
-            docIdCourse: widget.docIdCourse, lessonId: lesson.lessonId)
-        .then((value) {
-      if (value == null) {
-        learProg = LearningProgressModel(isCompleted: false, progress: 0.0);
-        learProgServices.createLessonProgress(
-          docIdCourse: widget.docIdCourse,
-          lessonId: lesson.lessonId,
-          value: learProg,
-        );
-        setState(() {});
-      }
-      learProg = value ?? LearningProgressModel();
-      setState(() {});
-    });
-  }
-
-  void getVideo() {
-    lessonServices.getLessons(widget.docIdCourse).then((values) {
-      lessons = values;
-      lesson = lessons[lessonIndex];
-
-      getProgress();
-
-      controller = YoutubePlayerController(
-        initialVideoId: lesson.videoPath!,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          loop: false,
-        ),
-      )..addListener(updateProgress);
-
-      setState(() {});
-    }).catchError((onError) {
-      debugPrint('Lỗi khi tải video: $onError');
-    });
-  }
-
-  void updateProgress() {
-    if (controller == null) return;
-    if (controller!.metadata.duration.inSeconds == 0) return;
-
-    final duration = controller!.metadata.duration.inSeconds;
-    final position = controller!.value.position.inSeconds;
-
-    double progress = position / duration;
-
-    setState(() {
-      learProg.progress = progress;
-    });
-    widget.updateProg?.call();
-    saveProgress(progress);
-  }
-
-  void saveProgress(double progress) {
-    if (lesson.lessonId == null || widget.docIdCourse.isEmpty) return;
-
-    bool isCompleted = progress >= 0.9;
-
-    LearningProgressModel updatedProgress = LearningProgressModel(
-      progress: progress,
-      isCompleted: isCompleted,
+  LessonVM viewModelBuilder(BuildContext context) {
+    return LessonVM(
+      docIdCourse: docIdCourse,
+      index: index,
+      updateProg: updateProg,
     );
-
-    learProgServices
-        .updateLessonProgress(
-          docIdCourse: widget.docIdCourse,
-          lessonId: lesson.lessonId ?? '',
-          value: updatedProgress,
-        )
-        .then((_) {})
-        .catchError((error) {
-      debugPrint('Lỗi khi lưu tiến độ: $error');
-    });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, LessonVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: AppTabBarBlue(
-        title: lesson.name ?? '',
+        title: viewModel.lesson.name ?? '',
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
           return Stack(
             children: [
               Positioned.fill(
-                child: controller == null
+                child: viewModel.controller == null
                     ? _loadingVideo()
                     : YoutubePlayerBuilder(
                         player: YoutubePlayer(
-                          controller: controller!,
+                          controller: viewModel.controller!,
                           onReady: () {},
                           onEnded: (_) {},
                         ),
@@ -159,7 +68,7 @@ class _LessonPageState extends State<LessonPage> {
                         onExitFullScreen: () {},
                       ),
               ),
-              _informationPositioned(),
+              _informationPositioned(context, viewModel),
             ],
           );
         },
@@ -183,7 +92,7 @@ class _LessonPageState extends State<LessonPage> {
     );
   }
 
-  Widget _informationPositioned() {
+  Widget _informationPositioned(BuildContext context, LessonVM viewModel) {
     return Positioned(
       left: 20.0,
       top: 230.0,
@@ -199,16 +108,16 @@ class _LessonPageState extends State<LessonPage> {
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: Row(
-              children: List.generate(tabNames.length, (idx) {
-                final tabName = tabNames[idx];
+              children: List.generate(viewModel.tabNames.length, (idx) {
+                final tabName = viewModel.tabNames[idx];
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => selectIndex = idx),
+                    onTap: () => viewModel.changeIndex(idx),
                     child: Container(
                       height: 45.0,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: idx == selectIndex
+                        color: idx == viewModel.selectIndex
                             ? AppColor.blue
                             : Colors.transparent,
                         borderRadius:
@@ -216,7 +125,7 @@ class _LessonPageState extends State<LessonPage> {
                       ),
                       child: Text(tabName,
                           style: AppStyles.STYLE_14.copyWith(
-                            color: idx == selectIndex
+                            color: idx == viewModel.selectIndex
                                 ? AppColor.white
                                 : AppColor.textColor,
                           )),
@@ -227,10 +136,10 @@ class _LessonPageState extends State<LessonPage> {
             ),
           ),
           IndexedStack(
-            index: selectIndex,
+            index: viewModel.selectIndex,
             children: [
-              _buildInformation(),
-              _buildLessonTab(),
+              _buildInformation(context, viewModel),
+              _buildLessonTab(viewModel),
             ],
           ),
         ],
@@ -238,7 +147,7 @@ class _LessonPageState extends State<LessonPage> {
     );
   }
 
-  Widget _buildInformation() {
+  Widget _buildInformation(BuildContext context, LessonVM viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -253,11 +162,11 @@ class _LessonPageState extends State<LessonPage> {
         ),
         const SizedBox(height: 10.0),
         LinearProgressIndicator(
-          value: learProg.progress ?? 0.0,
+          value: viewModel.learProg.progress ?? 0.0,
           backgroundColor: AppColor.grey,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColor.blue),
         ),
-        if (lesson.filePath != null) ...[
+        if (viewModel.lesson.filePath != null) ...[
           const SizedBox(height: 10.0),
           Text(
             'File: ',
@@ -270,7 +179,7 @@ class _LessonPageState extends State<LessonPage> {
           GestureDetector(
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => PdfViewerPage(
-                      url: lesson.filePath!,
+                      url: viewModel.lesson.filePath!,
                     ))),
             child: Container(
               height: 50.0,
@@ -290,7 +199,7 @@ class _LessonPageState extends State<LessonPage> {
                   ),
                   const SizedBox(width: 5.0),
                   Text(
-                    '${lesson.fileName}',
+                    '${viewModel.lesson.fileName}',
                     style:
                         AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
                   ),
@@ -316,7 +225,7 @@ class _LessonPageState extends State<LessonPage> {
         ),
         const SizedBox(height: 4.6),
         Text(
-          lesson.description ?? '-:-',
+          viewModel.lesson.description ?? '-:-',
           style: AppStyles.STYLE_14.copyWith(
             color: AppColor.black,
           ),
@@ -326,17 +235,12 @@ class _LessonPageState extends State<LessonPage> {
     );
   }
 
-  Widget _buildLessonTab() {
+  Widget _buildLessonTab(LessonVM viewModel) {
     return Column(
       children: List.generate(
-        lessons.length,
+        viewModel.lessons.length,
         (index) => GestureDetector(
-          onTap: () {
-            lessonIndex = index;
-            lesson = lessons[lessonIndex];
-            controller?.load(lesson.videoPath!);
-            setState(() {});
-          },
+          onTap: viewModel.changeLesson,
           child: Container(
             height: 50.0,
             margin: const EdgeInsets.only(top: 20.0),
@@ -351,9 +255,9 @@ class _LessonPageState extends State<LessonPage> {
               children: [
                 Expanded(
                   child: Text(
-                    'Lesson ${index + 1}: ${lessons[index].name}',
+                    'Lesson ${index + 1}: ${viewModel.lessons[index].name}',
                     style: AppStyles.STYLE_14.copyWith(
-                      color: lessonIndex == index
+                      color: viewModel.lessonIndex == index
                           ? AppColor.textColor
                           : AppColor.greyText,
                     ),
@@ -361,8 +265,9 @@ class _LessonPageState extends State<LessonPage> {
                 ),
                 IconButton(
                   icon: Icon(Icons.play_circle,
-                      color:
-                          lessonIndex == index ? AppColor.blue : AppColor.grey),
+                      color: viewModel.lessonIndex == index
+                          ? AppColor.blue
+                          : AppColor.grey),
                   onPressed: () {},
                 ),
               ],

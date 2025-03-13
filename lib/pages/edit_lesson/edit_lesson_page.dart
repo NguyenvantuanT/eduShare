@@ -1,19 +1,15 @@
-import 'dart:io';
-
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
-import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/pages/edit_lesson/edit_lesson_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/lesson_services.dart';
-import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/utils/validator.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
 
-class EditLessonPage extends StatefulWidget {
+class EditLessonPage extends StackedView<EditLessonVM> {
   const EditLessonPage({
     super.key,
     this.onUpdate,
@@ -22,69 +18,22 @@ class EditLessonPage extends StatefulWidget {
   });
 
   final Function()? onUpdate;
-
   final String lessonId;
   final String courseId;
 
   @override
-  State<EditLessonPage> createState() => _EditLessonPageState();
-}
-
-class _EditLessonPageState extends State<EditLessonPage> {
-  final nameLessonsController = TextEditingController();
-  final describeController = TextEditingController();
-  final videoPathController = TextEditingController();
-  StorageServices storageServices = StorageServices();
-  LessonServices lessonServices = LessonServices();
-  LessonModel lesson = LessonModel();
-  bool isLoading = false;
-  File? file;
-
-  @override
-  void initState() {
-    super.initState();
-    getLesson();
-  }
-
-  void getLesson() {
-    setState(() => isLoading = true);
-    lessonServices.getLesson(widget.courseId, widget.lessonId).then((value) {
-      lesson = value;
-      nameLessonsController.text = lesson.name ?? "";
-      describeController.text = lesson.description ?? "";
-      videoPathController.text = lesson.videoPath ?? "";
-      setState(() => isLoading = false);
-    });
-  }
-
-  Future<void> pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'],
-    );
-    if (result == null) return;
-    file = File(result.files.single.path!);
-    setState(() {});
-  }
-
-  void updateLesson(BuildContext context) async {
-    String fileName = file!.path.split('/').last;
-      lesson.name = nameLessonsController.text.trim();
-      lesson.description = describeController.text.trim();
-      lesson.videoPath = videoPathController.text.trim();
-      lesson.fileName = fileName;
-      lesson.filePath = file != null
-          ? await storageServices.postFile(fileName: fileName, file: file!)
-          : lesson.filePath;
-      widget.onUpdate?.call();
-      lessonServices.updateLesson(widget.courseId, lesson).then((_) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-    });
+  void onViewModelReady(EditLessonVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  EditLessonVM viewModelBuilder(BuildContext context) {
+    return EditLessonVM(lessonId: lessonId, courseId: courseId);
+  }
+
+  @override
+  Widget builder(BuildContext context, EditLessonVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: const AppTabBarBlue(title: 'Edit Lesson'),
@@ -97,7 +46,7 @@ class _EditLessonPageState extends State<EditLessonPage> {
           ),
           const SizedBox(height: 10.0),
           AppTextField(
-            controller: nameLessonsController,
+            controller: viewModel.nameLessonsController,
             labelText: "e.g., lesson ...",
             textInputAction: TextInputAction.next,
             validator: Validator.required,
@@ -108,7 +57,7 @@ class _EditLessonPageState extends State<EditLessonPage> {
             style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
           ),
           const SizedBox(height: 10.0),
-          buildTextFieldDes(describeController),
+          buildTextFieldDes(viewModel.describeController),
           const SizedBox(height: 20.0),
           Text(
             'Link Video?',
@@ -116,7 +65,7 @@ class _EditLessonPageState extends State<EditLessonPage> {
           ),
           const SizedBox(height: 10.0),
           AppTextField(
-            controller: videoPathController,
+            controller: viewModel.videoPathController,
             labelText: "e.g., path ...",
             textInputAction: TextInputAction.done,
             validator: Validator.required,
@@ -126,7 +75,7 @@ class _EditLessonPageState extends State<EditLessonPage> {
             'Change File?',
             style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
           ),
-          if (file != null) ...[
+          if (viewModel.file != null) ...[
             Container(
               margin: const EdgeInsets.only(top: 10.0),
               decoration: const BoxDecoration(
@@ -142,9 +91,9 @@ class _EditLessonPageState extends State<EditLessonPage> {
                     style: AppStyles.STYLE_14_BOLD
                         .copyWith(color: AppColor.textColor),
                   ),
-                  Text(file!.path.split('/').last),
+                  Text(viewModel.file!.path.split('/').last),
                   Text(
-                    'Size: ${(file!.lengthSync() / 1024).toStringAsFixed(2)} KB',
+                    'Size: ${(viewModel.file!.lengthSync() / 1024).toStringAsFixed(2)} KB',
                   ),
                 ],
               ),
@@ -153,13 +102,13 @@ class _EditLessonPageState extends State<EditLessonPage> {
           ],
           AppElevatedButton.outline(
             text: "Enter to change file",
-            onPressed: pickFile,
+            onPressed: viewModel.pickFile,
           ),
           const SizedBox(height: 30.0),
           AppElevatedButton(
             text: 'Save',
-            isDisable: isLoading,
-            onPressed: () => updateLesson(context),
+            isDisable: viewModel.isLoading,
+            onPressed: () => viewModel.updateLesson(context),
           ),
         ],
       ),

@@ -1,90 +1,32 @@
 import 'dart:io';
-import 'dart:developer' as dev;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/components/app_dialog.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
-import 'package:chat_app/components/delight_toast_show.dart';
-import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/auth/change_password_page.dart';
 import 'package:chat_app/pages/main_page.dart';
+import 'package:chat_app/pages/profile/profile_vm.dart';
 import 'package:chat_app/pages/profile/widgets/information_card.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
-import 'package:chat_app/services/remote/account_services.dart';
-import 'package:chat_app/services/remote/storage_services.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:stacked/stacked.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StackedView<ProfileVM> {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  StorageServices postImageServices = StorageServices();
-  ImagePicker picker = ImagePicker();
-  final formKey = GlobalKey<FormState>();
-  File? fileAvatar;
-  bool isLoading = false;
-  UserModel user = SharedPrefs.user ?? UserModel();
-  AccountServices accountServices = AccountServices();
+  ProfileVM viewModelBuilder(BuildContext context) => ProfileVM();
 
   @override
-  void initState() {
-    super.initState();
-    nameController.text = user.name ?? '';
-    emailController.text = user.email ?? '';
-  }
-
-  Future<void> pickAvatar() async {
-    XFile? result = await picker.pickImage(source: ImageSource.gallery);
-    if (result == null) return;
-    fileAvatar = File(result.path);
-    setState(() {});
-  }
-
-  Future<void> _updateProfile(BuildContext context) async {
-    setState(() => isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
-    final body = UserModel()
-      ..name = nameController.text.trim()
-      ..email = emailController.text.trim()
-      ..avatar = fileAvatar != null
-          ? await postImageServices.post(image: fileAvatar!)
-          : SharedPrefs.user?.avatar ?? "";
-    accountServices.updateProfile(body).then((_) {
-      SharedPrefs.user = body;
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        text: 'Profile has been saved 😍',
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => const MainPage(),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    }).catchError((onError) {
-      dev.log("Failed to update Profile: $onError");
-      if (!context.mounted) return;
-      DelightToastShow.showToast(
-        context: context,
-        text: 'Profile has been saved 😍',
-      );
-      setState(() => isLoading = false);
-    });
+  void onViewModelReady(ProfileVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget builder(BuildContext context, ProfileVM viewModel, Widget? child) {
     return Scaffold(
         backgroundColor: AppColor.bgColor,
         body: SingleChildScrollView(
@@ -94,10 +36,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: Column(
               children: [
-                _buildAvatar(),
+                _buildAvatar(viewModel),
                 const SizedBox(height: 10.0),
                 Text(
-                  user.name ?? '',
+                  viewModel.nameController.text,
                   style: AppStyles.STYLE_20_BOLD.copyWith(
                     color: AppColor.textColor,
                   ),
@@ -106,12 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 InformationCard(
                   icon: AppImages.iconProfile,
                   title: 'Username',
-                  infor: nameController.text,
-                  onPressed: () async {
-                    nameController.text = await AppDialog.editInformation(
-                        context, nameController.text, AppImages.iconProfile);
-                    setState(() {});
-                  },
+                  infor: viewModel.nameController.text,
+                  onPressed: () => viewModel.editProfile(context)
                 ),
                 const SizedBox(height: 20.0),
                 InformationCard(
@@ -122,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     color: AppColor.textColor,
                     size: 20.0,
                   ),
-                  infor: emailController.text,
+                  infor: viewModel.emailController.text,
                 ),
                 const SizedBox(height: 20.0),
                 InformationCard(
@@ -167,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   widthFactor: 0.6,
                   child: AppElevatedButton(
                     text: 'Save',
-                    onPressed: () => _updateProfile(context),
+                    onPressed: () => viewModel.updateProfile(context),
                   ),
                 )
               ],
@@ -176,13 +114,13 @@ class _ProfilePageState extends State<ProfilePage> {
         ));
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(ProfileVM viewModel) {
     const radius = 50.0;
     return GestureDetector(
-      onTap: isLoading ? null : pickAvatar,
+      onTap: viewModel.isLoading ? null : viewModel.pickAvatar,
       child: Stack(
         children: [
-          isLoading
+          viewModel.isLoading
               ? const CircleAvatar(
                   radius: radius,
                   backgroundColor: AppColor.blue,
@@ -194,16 +132,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 )
-              : fileAvatar != null
+              : viewModel.fileAvatar != null
                   ? CircleAvatar(
                       radius: radius,
-                      backgroundImage: FileImage(File(fileAvatar?.path ?? '')),
+                      backgroundImage: FileImage(File(viewModel.fileAvatar?.path ?? '')),
                     )
-                  : user.avatar != null
+                  : viewModel.user.avatar != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(radius),
                           child: CachedNetworkImage(
-                            imageUrl: user.avatar ?? '',
+                            imageUrl: viewModel.user.avatar ?? '',
                             fit: BoxFit.cover,
                             width: radius * 2,
                             height: radius * 2,
@@ -260,4 +198,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+  
+  
 }
+
+

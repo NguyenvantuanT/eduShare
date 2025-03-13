@@ -1,88 +1,36 @@
 import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
-import 'package:chat_app/models/quiz_model.dart';
-import 'package:chat_app/pages/result_page/result_page.dart';
+import 'package:chat_app/pages/quiz/quiz_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/services/remote/quiz_services.dart';
 import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
 
-class QuizPage extends StatefulWidget {
+class QuizPage extends StackedView<QuizVM> {
   const QuizPage({super.key, required this.couseId});
-
   final String couseId;
 
   @override
-  State<QuizPage> createState() => _QuizPageState();
-}
-
-class _QuizPageState extends State<QuizPage> {
-  List<QuizModel> quizs = [];
-  QuizServices quizServices = QuizServices();
-  bool isLoading = false;
-  int currentIndex = 0;
-  int? selectOtion;
-  int score = 0;
-  bool hasAnswered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    getQuizs();
-  }
-
-  void getQuizs() {
-    setState(() => isLoading = true);
-    quizServices.getQuizs(widget.couseId).then((value) {
-      quizs = value ?? [];
-      setState(() => isLoading = false);
-    });
-  }
-
-  void checkAnswer(int index) {
-    bool isCorrect = (quizs[currentIndex].correctOption ?? '').toLowerCase() ==
-        quizs[currentIndex].options?[index].toLowerCase();
-    setState(() {
-      hasAnswered = true;
-      selectOtion = index;
-      if (isCorrect) {
-        score++;
-      }
-    });
-  }
-
-  void nextQuestion() {
-    if (currentIndex < quizs.length - 1) {
-      setState(() {
-        currentIndex++;
-        hasAnswered = false;
-        selectOtion = null;
-      });
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultPage(
-            score: score,
-            totalQuestion: quizs.length,
-          ),
-        ),
-      );
-    }
+  void onViewModelReady(QuizVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
   }
 
   @override
-  Widget build(BuildContext context) {
+  QuizVM viewModelBuilder(BuildContext context) => QuizVM(couseId: couseId);
+
+  @override
+  Widget builder(BuildContext context, QuizVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       appBar: const AppTabBarBlue(title: 'Quiz'),
-      body: isLoading
+      body: viewModel.isLoading
           ? const Center(
               child: CircularProgressIndicator(
               color: AppColor.blue,
             ))
-          : quizs.isEmpty
+          : viewModel.quizs.isEmpty
               ? Center(
                   child: Text(
                   "No Quiz yey!",
@@ -96,7 +44,7 @@ class _QuizPageState extends State<QuizPage> {
                   child: Column(
                     children: [
                       LinearProgressIndicator(
-                        value: (currentIndex + 1) / quizs.length,
+                        value: (viewModel.currentIndex + 1) / viewModel.quizs.length,
                         backgroundColor: AppColor.grey,
                         color: AppColor.blue,
                         minHeight: 8,
@@ -111,7 +59,7 @@ class _QuizPageState extends State<QuizPage> {
                           boxShadow: AppShadow.boxShadowContainer,
                         ),
                         child: Text(
-                          quizs[currentIndex].question ?? '',
+                          viewModel.quizs[viewModel.currentIndex].question ?? '',
                           textAlign: TextAlign.center,
                           style:
                               AppStyles.STYLE_14.copyWith(color: AppColor.blue),
@@ -119,18 +67,18 @@ class _QuizPageState extends State<QuizPage> {
                       ),
                       Expanded(
                         child: ListView.separated(
-                          itemCount: (quizs[currentIndex].options ?? []).length,
+                          itemCount: (viewModel.quizs[viewModel.currentIndex].options ?? []).length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 15.0),
                           itemBuilder: (context, index) {
-                            return _buildOption(index);
+                            return _buildOption(index,viewModel);
                           },
                         ),
                       ),
-                      if (hasAnswered)
+                      if (viewModel.hasAnswered)
                         AppElevatedButton(
-                          onPressed: nextQuestion,
-                          text: currentIndex == quizs.length - 1
+                          onPressed: () => viewModel.nextQuestion(context),
+                          text: viewModel.currentIndex == viewModel.quizs.length - 1
                               ? 'Finish'
                               : 'Next',
                         ),
@@ -141,24 +89,23 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildOption(int index) {
-    bool isCorrect = (quizs[currentIndex].correctOption ?? '').toLowerCase() ==
-        quizs[currentIndex].options?[index].toLowerCase();
-    bool isSelected = selectOtion == index;
-    Color bgColor = hasAnswered
+  Widget _buildOption(int index, QuizVM viewModel) {
+    bool isCorrect = (viewModel.quizs[viewModel.currentIndex].correctOption ?? '').toLowerCase() ==
+        viewModel.quizs[viewModel.currentIndex].options?[index].toLowerCase();
+    bool isSelected = viewModel.selectOtion == index;
+    Color bgColor = viewModel.hasAnswered
         ? (isCorrect
             ? AppColor.green
             : isSelected
                 ? AppColor.red
                 : AppColor.white)
         : AppColor.white;
-    Color colorText = hasAnswered && (isCorrect || isSelected)
+    Color colorText = viewModel.hasAnswered && (isCorrect || isSelected)
         ? AppColor.bgColor
         : AppColor.textColor;
     return InkWell(
-      onTap: hasAnswered ? null : () => checkAnswer(index),
+      onTap: viewModel.hasAnswered ? null : () => viewModel.checkAnswer(index),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 12.0),
         decoration: BoxDecoration(
           color: bgColor,
@@ -166,10 +113,11 @@ class _QuizPageState extends State<QuizPage> {
           boxShadow: AppShadow.boxShadowContainer,
         ),
         child: Text(
-          quizs[currentIndex].options?[index] ?? '',
+          viewModel.quizs[viewModel.currentIndex].options?[index] ?? '',
           style: AppStyles.STYLE_14.copyWith(color: colorText),
         ),
       ),
     );
   }
 }
+

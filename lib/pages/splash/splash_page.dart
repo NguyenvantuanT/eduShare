@@ -9,6 +9,7 @@ import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
