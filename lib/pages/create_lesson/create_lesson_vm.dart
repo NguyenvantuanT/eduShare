@@ -18,6 +18,7 @@ class CreateLessonVM extends BaseViewModel {
   StorageServices storageServices = StorageServices();
   LessonServices lessonServices = LessonServices();
   File? file;
+  String? fileName ;
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -26,11 +27,11 @@ class CreateLessonVM extends BaseViewModel {
     );
     if (result == null) return;
     file = File(result.files.single.path!);
+    fileName = file!.path.split('/').last;
     rebuildUi();
   }
 
   void createLesson(BuildContext context) async {
-    String fileName = file!.path.split('/').last;
     LessonModel lesson = LessonModel()
       ..id = '${DateTime.now().millisecondsSinceEpoch}'
       ..name = nameLessonsController.text.trim()
@@ -38,7 +39,7 @@ class CreateLessonVM extends BaseViewModel {
       ..videoPath = videoPathController.text.trim()
       ..fileName = fileName
       ..filePath = file != null
-          ? await storageServices.postFile(fileName: fileName, file: file!)
+          ? await storageServices.postFile(fileName: fileName ?? '', file: file!)
           : null;
     onUpdate?.call();
     lessonServices.createLesson(docIdCourse, lesson).then((_) {
