@@ -14,6 +14,12 @@ class OnBoardingPage extends StackedView<OnBoardingVm> {
   OnBoardingVm viewModelBuilder(BuildContext context) => OnBoardingVm();
 
   @override
+  void onViewModelReady(OnBoardingVm viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
+  }
+
+  @override
   Widget builder(BuildContext context, OnBoardingVm viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,

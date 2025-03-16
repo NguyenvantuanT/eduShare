@@ -1,10 +1,9 @@
 import 'package:chat_app/models/lesson_model.dart';
-import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/learning_progress_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
+import 'package:chat_app/services/remote/video_player_services.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class LessonVM extends BaseViewModel {
   LessonVM({
@@ -16,111 +15,104 @@ class LessonVM extends BaseViewModel {
   final String docIdCourse;
   final int index;
   final VoidCallback? updateProg;
+  late ProgressTracker progressTracker;
 
-  LearningProgressServices learProgServices = LearningProgressServices();
-  LearningProgressModel learProg = LearningProgressModel();
+  VideoPlayerServices videoPlayerServices = VideoPlayerServices();
   LessonServices lessonServices = LessonServices();
-  YoutubePlayerController? controller;
   LessonModel lesson = LessonModel();
   List<LessonModel> lessons = [];
   late int lessonIndex;
-  String email = SharedPrefs.user?.email ?? '';
   List<String> tabNames = ['Information', 'Lessons'];
   int selectIndex = 0;
+  double progress = 0.0;
 
   void onInit() {
+    progressTracker = ProgressTracker(LearningProgressServices());
     lessonIndex = index;
     getVideo();
   }
 
-  void changeLesson() {
-    lessonIndex = index;
-    lesson = lessons[lessonIndex];
-    controller?.load(lesson.videoPath!);
-    rebuildUi();
+  Future<void> getVideo() async {
+    setBusy(true); 
+    try {
+      lessons = await lessonServices.getLessons(docIdCourse);
+      lesson = lessons[lessonIndex];
+      await getProgress(); 
+      videoPlayerServices.initialize(
+        lesson.videoPath ?? '',
+        startAt: (progress * 1000).toInt(), 
+      );
+      videoPlayerServices.controller?.addListener(updateProgress);
+    } catch (onError) {
+      debugPrint('Lỗi khi tải video: $onError');
+    } finally {
+      setBusy(false);
+      rebuildUi();
+    }
   }
 
-  
+  Future<void> changeLesson(int index) async {
+    if (lessonIndex != index) { 
+      saveProgress(); 
+      lessonIndex = index;
+      lesson = lessons[lessonIndex];
+      await getProgress();
+      videoPlayerServices.loadVideo(
+        lesson.videoPath ?? '',
+        startAt: (progress * 1000).toInt(), 
+      );
+      rebuildUi();
+    }
+  }
 
   void changeIndex(int idx) {
     selectIndex = idx;
     rebuildUi();
   }
 
-  void getVideo() {
-    lessonServices.getLessons(docIdCourse).then((values) {
-      lessons = values;
-      lesson = lessons[lessonIndex];
-
-      getProgress();
-
-      controller = YoutubePlayerController(
-        initialVideoId: lesson.videoPath!,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          loop: false,
-        ),
-      )..addListener(updateProgress);
-
-      rebuildUi();
-    }).catchError((onError) {
-      debugPrint('Lỗi khi tải video: $onError');
-    });
-  }
-
-  void getProgress() {
-    learProgServices
-        .getLessonProgress(docIdCourse: docIdCourse, lessonId: lesson.lessonId)
-        .then((value) {
-      if (value == null) {
-        learProg = LearningProgressModel(isCompleted: false, progress: 0.0);
-        learProgServices.createLessonProgress(
-          docIdCourse: docIdCourse,
-          lessonId: lesson.lessonId,
-          value: learProg,
-        );
-        rebuildUi();
-      }
-      learProg = value ?? LearningProgressModel();
-      rebuildUi();
-    });
+  Future<void> getProgress() async {
+    try {
+      final value = await progressTracker.getProgress(
+        docIdCourse: docIdCourse,
+        lessonId: lesson.lessonId ,
+      );
+      progress = value?.progress ?? 0.0; 
+    } catch (error) {
+      debugPrint('Lỗi khi lấy tiến độ: $error');
+      progress = 0.0; 
+    }
   }
 
   void updateProgress() {
-    if (controller == null) return;
-    if (controller!.metadata.duration.inSeconds == 0) return;
+    if (videoPlayerServices.controller == null) return;
+    final duration = videoPlayerServices.controller!.metadata.duration.inSeconds;
+    if (duration == 0) return;
 
-    final duration = controller!.metadata.duration.inSeconds;
-    final position = controller!.value.position.inSeconds;
+    progress = videoPlayerServices.controller!.value.position.inSeconds / duration;
 
-    double progress = position / duration;
-
-    learProg.progress = progress;
-
+    if (!videoPlayerServices.controller!.value.isPlaying &&
+        videoPlayerServices.controller!.value.position > Duration.zero) {
+      saveProgress(); 
+    }
     rebuildUi();
-    updateProg?.call();
-    saveProgress(progress);
   }
 
-  void saveProgress(double progress) {
-    if (lesson.lessonId == null || docIdCourse.isEmpty) return;
+  void saveProgress() {
+    if (lesson.lessonId != null) {
+      progressTracker.saveProgress(
+        docIdCourse: docIdCourse,
+        lessonId: lesson.lessonId!,
+        progress: progress,
+        onSuccess: () {
+          updateProg?.call();
+        },
+      );
+    }
+  }
 
-    bool isCompleted = progress >= 0.9;
-
-    LearningProgressModel updatedProgress = LearningProgressModel(
-      progress: progress,
-      isCompleted: isCompleted,
-    );
-
-    learProgServices
-        .updateLessonProgress(
-          docIdCourse: docIdCourse,
-          lessonId: lesson.lessonId ?? '',
-          value: updatedProgress,
-        )
-        .then((_) {})
-        .catchError((error) {
-      debugPrint('Lỗi khi lưu tiến độ: $error');
-    });
+  @override
+  void dispose() {
+    videoPlayerServices.dispose();
+    super.dispose();
   }
 }

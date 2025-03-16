@@ -18,7 +18,6 @@ class LearCourseCard extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        
         margin: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
         decoration: BoxDecoration(
             color: AppColor.white,

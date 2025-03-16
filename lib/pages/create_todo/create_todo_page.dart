@@ -15,6 +15,12 @@ class CreateTodoPage extends StackedView<CreateTodoVM> {
   final String? timeSt;
 
   @override
+  void onViewModelReady(CreateTodoVM viewModel) {
+    super.onViewModelReady(viewModel);
+    viewModel.onInit();
+  }
+
+  @override
   CreateTodoVM viewModelBuilder(BuildContext context) =>  CreateTodoVM(title: title,timeSt: timeSt);
 
   @override
