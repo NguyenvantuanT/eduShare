@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
+import 'package:chat_app/utils/app_function.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -30,11 +31,10 @@ class EditLessonVM extends BaseViewModel {
     getLesson();
   }
 
-
   void getLesson() {
     isLoading = true;
     rebuildUi();
-    lessonServices.getLesson(courseId,lessonId).then((value) {
+    lessonServices.getLesson(courseId, lessonId).then((value) {
       lesson = value;
       nameLessonsController.text = lesson.name ?? "";
       describeController.text = lesson.description ?? "";
@@ -55,19 +55,19 @@ class EditLessonVM extends BaseViewModel {
   }
 
   void updateLesson(BuildContext context) async {
-    String fileName = file!.path.split('/').last;
-      lesson.name = nameLessonsController.text.trim();
-      lesson.description = describeController.text.trim();
-      lesson.videoPath = videoPathController.text.trim();
-      lesson.fileName = fileName;
-      lesson.filePath = file != null
-          ? await storageServices.postFile(fileName: fileName, file: file!)
-          : lesson.filePath;
+    final link = AppFunction.converLinkYoutube(videoPathController.text.trim());
+    String fileName = file != null ? file!.path.split('/').last : '';
+    lesson.name = nameLessonsController.text.trim();
+    lesson.description = describeController.text.trim();
+    lesson.videoPath = link ?? lesson.videoPath;
+    lesson.fileName = fileName;
+    lesson.filePath = file != null
+        ? await storageServices.postFile(fileName: fileName, file: file!)
+        : lesson.filePath;
+    lessonServices.updateLesson(courseId, lesson).then((_) {
       onUpdate?.call();
-      lessonServices.updateLesson(courseId, lesson).then((_) {
       if (!context.mounted) return;
       Navigator.pop(context);
     });
   }
-
 }
