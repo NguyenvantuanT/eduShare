@@ -49,11 +49,11 @@ class LessonPage extends StackedView<LessonVM> {
           return Stack(
             children: [
               Positioned.fill(
-                child: viewModel.controller == null
+                child: viewModel.videoPlayerServices.controller == null
                     ? _loadingVideo()
                     : YoutubePlayerBuilder(
                         player: YoutubePlayer(
-                          controller: viewModel.controller!,
+                          controller: viewModel.videoPlayerServices.controller!,
                           onReady: () {},
                           onEnded: (_) {},
                         ),
@@ -162,7 +162,7 @@ class LessonPage extends StackedView<LessonVM> {
         ),
         const SizedBox(height: 10.0),
         LinearProgressIndicator(
-          value: viewModel.learProg.progress ?? 0.0,
+          value: viewModel.progress ,
           backgroundColor: AppColor.grey,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColor.blue),
         ),
