@@ -22,7 +22,7 @@ class CourseDetailVM extends BaseViewModel {
 
   LearningProgressServices learProgServices = LearningProgressServices();
   TextEditingController commentController = TextEditingController();
-  Map<String, double> lessonProgress = {};
+
   CourseServices courseServices = CourseServices();
   LessonServices lessonServices = LessonServices();
   CommentServices commentServices = CommentServices();
@@ -36,6 +36,12 @@ class CourseDetailVM extends BaseViewModel {
 
   void onInit() {
     getCourse();
+  }
+
+  @override
+  void dispose() {
+    commentController.dispose();
+    super.dispose();
   }
 
   void getCourse() {
@@ -64,14 +70,18 @@ class CourseDetailVM extends BaseViewModel {
         });
   }
 
-  void getProgress() {
-    for (var lesson in lessons) {
-      learProgServices
-          .getLessonProgress(docIdCourse: docId, lessonId: lesson.lessonId)
-          .then((value) {
-        lessonProgress[lesson.lessonId ?? ""] = value?.progress ?? 0.0;
-        rebuildUi();
-      });
+  Future<void> getProgress() async {
+    try {
+      for (var lesson in lessons) {
+        final progress = await learProgServices.getLessonProgress(
+          docIdCourse: docId,
+          lessonId: lesson.lessonId ?? '',
+        );
+        lesson.progress = progress?.progress ?? 0.0; 
+      }
+      rebuildUi();
+    } catch (error) {
+      debugPrint('Lỗi khi lấy tiến độ: $error');
     }
   }
 

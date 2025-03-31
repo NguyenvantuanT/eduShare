@@ -34,10 +34,14 @@ class ProgressTracker {
     String? docIdCourse,
     String? lessonId,
     double? progress,
+    bool? isCompleted,
     VoidCallback? onSuccess,
   }) {
     debouncer.run(() {
-      final progressModel = LearningProgressModel(progress: progress);
+      final progressModel = LearningProgressModel(
+        progress: progress,
+        isCompleted: isCompleted ?? false,
+      );
       services
           .createLessonProgress(
             docIdCourse: docIdCourse,
@@ -52,8 +56,8 @@ class ProgressTracker {
   }
 
   Future<LearningProgressModel?> getProgress({
-    String? docIdCourse ,
-    String? lessonId ,
+    String? docIdCourse,
+    String? lessonId,
   }) async {
     return await services.getLessonProgress(
       docIdCourse: docIdCourse,

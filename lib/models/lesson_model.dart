@@ -6,6 +6,7 @@ class LessonModel {
   String? filePath;
   String? fileName;
   String? description;
+  double progress = 0.0;
 
   LessonModel();
 
