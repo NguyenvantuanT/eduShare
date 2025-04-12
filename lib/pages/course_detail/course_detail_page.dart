@@ -20,7 +20,7 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
 
   final String docId;
   final VoidCallback? onUpdate;
-  
+
   @override
   void onViewModelReady(CourseDetailVM viewModel) {
     super.onViewModelReady(viewModel);
@@ -262,11 +262,12 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
     );
   }
 
-  Widget _buildLessonCard(BuildContext context,
-      {required int idx,
-      required LessonModel lesson,
-      required CourseDetailVM viewModel}) {
-    final progress = viewModel.lessonProgress[lesson.lessonId ?? ""] ?? 0.0;
+  Widget _buildLessonCard(
+    BuildContext context, {
+    required int idx,
+    required LessonModel lesson,
+    required CourseDetailVM viewModel,
+  }) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.of(context).push(
@@ -297,23 +298,16 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
                   overflow: TextOverflow.ellipsis,
                   style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
                 ),
+                const SizedBox(height: 10.0),
+                LinearProgressIndicator(
+                  value: lesson.progress,
+                  minHeight:8.0,
+                  backgroundColor: AppColor.grey,
+                  borderRadius:const BorderRadius.all(Radius.circular(10.0)),
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(AppColor.blue),
+                ),
               ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 6.0),
-            color: AppColor.blue,
-            height: 25.0,
-            width: 1.2,
-          ),
-          Expanded(
-            child: Text(
-              'Tiến độ: ${(progress * 100).toStringAsFixed(1)}%',
-              style: AppStyles.STYLE_14.copyWith(
-                color: AppColor.black,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.start,
             ),
           ),
           SvgPicture.asset(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
 import 'package:chat_app/services/remote/storage_services.dart';
+import 'package:chat_app/utils/app_function.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -32,11 +33,12 @@ class CreateLessonVM extends BaseViewModel {
   }
 
   void createLesson(BuildContext context) async {
+    final videoPath = AppFunction.converLinkYoutube(videoPathController.text.trim());
     LessonModel lesson = LessonModel()
       ..id = '${DateTime.now().millisecondsSinceEpoch}'
       ..name = nameLessonsController.text.trim()
       ..description = describeController.text.trim()
-      ..videoPath = videoPathController.text.trim()
+      ..videoPath = videoPath
       ..fileName = fileName
       ..filePath = file != null
           ? await storageServices.postFile(fileName: fileName ?? '', file: file!)

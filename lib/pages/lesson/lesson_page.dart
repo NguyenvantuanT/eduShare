@@ -162,7 +162,7 @@ class LessonPage extends StackedView<LessonVM> {
         ),
         const SizedBox(height: 10.0),
         LinearProgressIndicator(
-          value: viewModel.progress ,
+          value: viewModel.progress,
           backgroundColor: AppColor.grey,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColor.blue),
         ),
@@ -240,7 +240,7 @@ class LessonPage extends StackedView<LessonVM> {
       children: List.generate(
         viewModel.lessons.length,
         (index) => GestureDetector(
-          onTap: () =>  viewModel.changeLesson(index),
+          onTap: () => viewModel.changeLesson(index),
           child: Container(
             height: 50.0,
             margin: const EdgeInsets.only(top: 20.0),
