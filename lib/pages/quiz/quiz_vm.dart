@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 class QuizVM extends BaseViewModel {
-  QuizVM({required this.couseId});
+  QuizVM({required this.couseId, this.level});
   final String couseId;
+  final DifficultyLevel? level;
 
   //===========================/
   final QuizServices _quizServices = QuizServices();
@@ -23,7 +24,11 @@ class QuizVM extends BaseViewModel {
   Future<void> onInit() async {
     isLoading = true;
     rebuildUi();
-    quizs = await _quizServices.getQuizs(couseId) ?? [];
+    if (level == null) {
+      quizs = await _quizServices.getQuizs(couseId) ?? [];
+    } else {
+      quizs = await _quizServices.getQuizzesByDifficulty(couseId, level: level) ?? [];
+    }
     isLoading = false;
     rebuildUi();
   }

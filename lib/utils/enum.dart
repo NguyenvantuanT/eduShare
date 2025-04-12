@@ -16,3 +16,5 @@ enum DatePickerType {
 }
 
 enum QuizType { singleChoice, multipleChoice, qa }
+
+enum DifficultyLevel { easy, normal, hard }

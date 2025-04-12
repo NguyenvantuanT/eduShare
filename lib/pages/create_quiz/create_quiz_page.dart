@@ -2,6 +2,7 @@ import 'package:chat_app/components/app_bar/app_tab_bar_blue.dart';
 import 'package:chat_app/components/app_drop_down.dart';
 import 'package:chat_app/components/button/app_elevated_button.dart';
 import 'package:chat_app/components/text_field/app_text_field.dart';
+import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/pages/create_quiz/create_quiz_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
@@ -11,25 +12,59 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 class CreateQuizPage extends StackedView<CreateQuizVM> {
-  const CreateQuizPage({super.key, required this.courseId, this.onUpdate});
+  const CreateQuizPage({
+    super.key,
+    required this.courseId,
+    this.quiz,
+    this.onUpdate,
+  });
 
   final String courseId;
+  final QuizModel? quiz;
   final Function()? onUpdate;
 
   @override
-  CreateQuizVM viewModelBuilder(BuildContext context) =>
-      CreateQuizVM(courseId: courseId, onUpdate: onUpdate);
+  void onViewModelReady(CreateQuizVM viewModel) {
+    viewModel.initializeQuizData();
+  }
+
+  @override
+  CreateQuizVM viewModelBuilder(BuildContext context) => CreateQuizVM(
+        courseId: courseId,
+        quiz: quiz,
+        onUpdate: onUpdate,
+      );
 
   @override
   Widget builder(BuildContext context, CreateQuizVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      appBar: const AppTabBarBlue(title: 'Create Quiz'),
+      appBar: AppTabBarBlue(
+        title: quiz == null ? 'Create Quiz' : 'Edit Quiz',
+      ),
       body: Form(
         key: viewModel.formKey,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           children: [
+            Text(
+              'Difficulty Level?',
+              style:
+                  AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
+            ),
+            const SizedBox(height: 10.0),
+            AppDropDown<DifficultyLevel>(
+              items: DifficultyLevel.values,
+              selectedItem: viewModel.selectedDifficulty,
+              onChanged: viewModel.choiceDifficulty,
+              itemBuilder: (value) {
+                return Text(
+                  value.name,
+                  style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
+                );
+              },
+            ),
+            const SizedBox(height: 20.0),
             Text(
               'Type Question?',
               style:
@@ -48,10 +83,24 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               },
             ),
             const SizedBox(height: 20.0),
-            Text(
-              'Question?',
-              style:
-                  AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Question?',
+                  style: AppStyles.STYLE_14_BOLD
+                      .copyWith(color: AppColor.textColor),
+                ),
+                IconButton(
+                  onPressed: () => _showSuggestionsModal(context,viewModel),
+                  icon: const Icon(
+                    Icons.lightbulb_outline,
+                    color: AppColor.blue,
+                    size: 20,
+                  ),
+                  tooltip: 'Suggest Questions',
+                ),
+              ],
             ),
             const SizedBox(height: 10.0),
             AppTextField(
@@ -62,7 +111,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
             ),
             const SizedBox(height: 20.0),
             Text(
-              'Option ?',
+              viewModel.selectedType == QuizType.qa ? 'Answer?' : 'Option?',
               style:
                   AppStyles.STYLE_14_BOLD.copyWith(color: AppColor.textColor),
             ),
@@ -72,22 +121,104 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
             FractionallySizedBox(
               widthFactor: 0.5,
               child: AppElevatedButton(
-                text: "Create Quiz",
+                text: quiz == null ? "Create Quiz" : "Update Quiz",
+                isDisable: viewModel.isLoading,
                 onPressed: () => viewModel.createQuiz(context),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
+  void _showSuggestionsModal(BuildContext context, CreateQuizVM viewModel) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      backgroundColor: AppColor.bgColor,
+      builder: (context) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Suggested Questions',
+                style: AppStyles.STYLE_16_BOLD.copyWith(color: AppColor.textColor),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: viewModel.trivis.length,
+                itemBuilder: (context, index) {
+                  final trivia = viewModel.trivis[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    title: Text(
+                      trivia.question ?? "",
+                      style: AppStyles.STYLE_14.copyWith(
+                        color: AppColor.textColor,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Difficulty: ${trivia.difficulty}',
+                              style: AppStyles.STYLE_12.copyWith(
+                                color: AppColor.greyText,
+                              ),
+                            ),
+                            const SizedBox(width: 16.0),
+                            Text(
+                              'Type: ${trivia.type == 'multiple' ? 'single Choice' : 'True/False'}',
+                              style: AppStyles.STYLE_12.copyWith(
+                                color: AppColor.greyText,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          'Answer: ${trivia.correctAnswer}',
+                          style: AppStyles.STYLE_12.copyWith(
+                            color: AppColor.greyText,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      viewModel.selectSuggestion(trivia);
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+
   Widget _buildWidgetQuizType(CreateQuizVM viewModel) {
     switch (viewModel.selectedType) {
       case QuizType.singleChoice:
-        return _buildSiglerChoice(viewModel);
+        return _buildSingleChoice(viewModel);
       case QuizType.multipleChoice:
-        return _buildmultipleChoice(viewModel);
+        return _buildMultipleChoice(viewModel);
       default:
         return _buildQAChoice(viewModel);
     }
@@ -105,7 +236,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
     );
   }
 
-  Widget _buildSiglerChoice(CreateQuizVM viewModel) {
+  Widget _buildSingleChoice(CreateQuizVM viewModel) {
     return Column(
       children: List.generate(4, (index) {
         return Padding(
@@ -127,7 +258,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
                   viewModel.correctOptionIndex = value;
                   viewModel.rebuildUi();
                 },
-              )
+              ),
             ],
           ),
         );
@@ -135,7 +266,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
     );
   }
 
-  Widget _buildmultipleChoice(CreateQuizVM viewModel) {
+  Widget _buildMultipleChoice(CreateQuizVM viewModel) {
     return Column(
       children: List.generate(4, (index) {
         return Padding(

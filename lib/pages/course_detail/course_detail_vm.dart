@@ -4,6 +4,7 @@ import 'package:chat_app/components/delight_toast_show.dart';
 import 'package:chat_app/models/comment_model.dart';
 import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
+import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/pages/create_todo/create_todo_page.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -12,6 +13,8 @@ import 'package:chat_app/services/remote/comment_services.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/learning_progress_services.dart';
 import 'package:chat_app/services/remote/lesson_services.dart';
+import 'package:chat_app/services/remote/quiz_services.dart';
+import 'package:chat_app/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -22,7 +25,8 @@ class CourseDetailVM extends BaseViewModel {
 
   LearningProgressServices learProgServices = LearningProgressServices();
   TextEditingController commentController = TextEditingController();
-
+  QuizServices quizServices = QuizServices();
+  DifficultyLevel? selectedDifficulty = DifficultyLevel.easy;
   CourseServices courseServices = CourseServices();
   LessonServices lessonServices = LessonServices();
   CommentServices commentServices = CommentServices();
@@ -30,6 +34,7 @@ class CourseDetailVM extends BaseViewModel {
   UserModel user = SharedPrefs.user ?? UserModel();
   List<LessonModel> lessons = [];
   List<CommentModel> comments = [];
+  List<QuizModel> quizzes = [];
   bool isFavorite = false;
   bool isLearning = false;
   bool isLoading = false;
@@ -42,6 +47,12 @@ class CourseDetailVM extends BaseViewModel {
   void dispose() {
     commentController.dispose();
     super.dispose();
+  }
+
+
+  void selectDifficulty(DifficultyLevel? difficulty) {
+    selectedDifficulty = difficulty;
+    rebuildUi();
   }
 
   void getCourse() {
@@ -77,7 +88,7 @@ class CourseDetailVM extends BaseViewModel {
           docIdCourse: docId,
           lessonId: lesson.lessonId ?? '',
         );
-        lesson.progress = progress?.progress ?? 0.0; 
+        lesson.progress = progress?.progress ?? 0.0;
       }
       rebuildUi();
     } catch (error) {

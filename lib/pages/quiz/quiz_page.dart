@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 class QuizPage extends StackedView<QuizVM> {
-  const QuizPage({super.key, required this.couseId});
+  const QuizPage(this.couseId, {super.key, this.level});
   final String couseId;
+  final DifficultyLevel? level;
 
   @override
   void onViewModelReady(QuizVM viewModel) {
@@ -20,7 +21,8 @@ class QuizPage extends StackedView<QuizVM> {
   }
 
   @override
-  QuizVM viewModelBuilder(BuildContext context) => QuizVM(couseId: couseId);
+  QuizVM viewModelBuilder(BuildContext context) =>
+      QuizVM(couseId: couseId, level: level);
 
   @override
   Widget builder(BuildContext context, QuizVM viewModel, Widget? child) {
@@ -48,7 +50,8 @@ class QuizPage extends StackedView<QuizVM> {
                   child: Column(
                     children: [
                       LinearProgressIndicator(
-                        value: (viewModel.currentIndex + 1) / viewModel.quizs.length,
+                        value: (viewModel.currentIndex + 1) /
+                            viewModel.quizs.length,
                         backgroundColor: AppColor.grey,
                         color: AppColor.blue,
                         minHeight: 8,
@@ -63,9 +66,11 @@ class QuizPage extends StackedView<QuizVM> {
                           boxShadow: AppShadow.boxShadowContainer,
                         ),
                         child: Text(
-                          viewModel.quizs[viewModel.currentIndex].question ?? '',
+                          viewModel.quizs[viewModel.currentIndex].question ??
+                              '',
                           textAlign: TextAlign.center,
-                          style: AppStyles.STYLE_14.copyWith(color: AppColor.blue),
+                          style:
+                              AppStyles.STYLE_14.copyWith(color: AppColor.blue),
                         ),
                       ),
                       Expanded(
@@ -74,7 +79,8 @@ class QuizPage extends StackedView<QuizVM> {
                       if (viewModel.hasAnswered)
                         AppElevatedButton(
                           onPressed: () => viewModel.nextQuestion(context),
-                          text: viewModel.currentIndex == viewModel.quizs.length - 1
+                          text: viewModel.currentIndex ==
+                                  viewModel.quizs.length - 1
                               ? 'Finish'
                               : 'Next',
                         ),
@@ -116,7 +122,8 @@ class QuizPage extends StackedView<QuizVM> {
                     viewModel.checkAnswer(viewModel.selectedOptions);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please select at least one option')),
+                      const SnackBar(
+                          content: Text('Please select at least one option')),
                     );
                   }
                 },
@@ -161,7 +168,6 @@ class QuizPage extends StackedView<QuizVM> {
           ],
         );
       case null:
-        // TODO: Handle this case.
         throw UnimplementedError();
     }
   }
@@ -234,7 +240,8 @@ class QuizPage extends StackedView<QuizVM> {
               onChanged: viewModel.hasAnswered
                   ? null
                   : (value) {
-                      viewModel.updateMultipleChoiceSelection(index, value ?? false);
+                      viewModel.updateMultipleChoiceSelection(
+                          index, value ?? false);
                     },
             ),
             Expanded(
