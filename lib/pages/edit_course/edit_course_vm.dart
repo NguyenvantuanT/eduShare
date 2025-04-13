@@ -100,12 +100,13 @@ class EditCourseVM extends BaseViewModel {
     );
   }
 
-  void createQuiz(BuildContext context) {
+  void createQuiz(BuildContext context, {QuizModel? quiz}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CreateQuizPage(
           courseId: docId,
           onUpdate: getQuizs,
+          quiz: quiz,
         ),
       ),
     );

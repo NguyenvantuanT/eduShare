@@ -1,43 +1,65 @@
 import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/pages/result_page/result_page.dart';
 import 'package:chat_app/services/remote/quiz_services.dart';
+import 'package:chat_app/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 class QuizVM extends BaseViewModel {
-  QuizVM({required this.couseId});
+  QuizVM({required this.couseId, this.level});
   final String couseId;
+  final DifficultyLevel? level;
 
   //===========================/
+  final QuizServices _quizServices = QuizServices();
   List<QuizModel> quizs = [];
-  QuizServices quizServices = QuizServices();
-  bool isLoading = false;
   int currentIndex = 0;
-  int? selectOtion;
-  int score = 0;
+  int? selectedOption;
+  List<int> selectedOptions = [];
+  String? qaAnswer;
   bool hasAnswered = false;
+  bool isLoading = false;
+  int score = 0;
 
-  void onInit() {
-    getQuizs();
-  }
-
-  void getQuizs() {
+  Future<void> onInit() async {
     isLoading = true;
     rebuildUi();
-    quizServices.getQuizs(couseId).then((value) {
-      quizs = value ?? [];
-      isLoading = false;
-      rebuildUi();
-    });
+    if (level == null) {
+      quizs = await _quizServices.getQuizs(couseId) ?? [];
+    } else {
+      quizs = await _quizServices.getQuizzesByDifficulty(couseId, level: level) ?? [];
+    }
+    isLoading = false;
+    rebuildUi();
   }
 
-  void checkAnswer(int index) {
-    bool isCorrect = (quizs[currentIndex].correctOption ?? '').toLowerCase() ==
-        quizs[currentIndex].options?[index].toLowerCase();
+  void checkAnswer(dynamic answer) {
     hasAnswered = true;
-    selectOtion = index;
-    if (isCorrect) {
-      score++;
+    switch (quizs[currentIndex].type) {
+      case QuizType.singleChoice:
+        selectedOption = answer as int;
+        if (selectedOption == quizs[currentIndex].correctOptionIndex) {
+          score++;
+        }
+        break;
+      case QuizType.multipleChoice:
+        selectedOptions = List<int>.from(answer as List);
+        List<int> correctAnswers =
+            quizs[currentIndex].correctOptionIndices ?? [];
+        if (selectedOptions.length == correctAnswers.length &&
+            selectedOptions.every((index) => correctAnswers.contains(index))) {
+          score++;
+        }
+        break;
+      case QuizType.qa:
+        qaAnswer = answer as String;
+        if (qaAnswer?.trim().toLowerCase() ==
+            quizs[currentIndex].correctAnswer?.trim().toLowerCase()) {
+          score++;
+        }
+        break;
+      case null:
+        throw UnimplementedError();
     }
     rebuildUi();
   }
@@ -45,19 +67,30 @@ class QuizVM extends BaseViewModel {
   void nextQuestion(BuildContext context) {
     if (currentIndex < quizs.length - 1) {
       currentIndex++;
+      selectedOption = null;
+      selectedOptions.clear();
+      qaAnswer = null;
       hasAnswered = false;
-      selectOtion = null;
-      rebuildUi();
+      notifyListeners();
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultPage(
+          builder: (_) => ResultPage(
             score: score,
             totalQuestion: quizs.length,
           ),
         ),
       );
     }
+  }
+
+  void updateMultipleChoiceSelection(int index, bool isSelected) {
+    if (isSelected) {
+      selectedOptions.add(index);
+    } else {
+      selectedOptions.remove(index);
+    }
+    notifyListeners();
   }
 }

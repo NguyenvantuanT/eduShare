@@ -14,3 +14,7 @@ enum DatePickerType {
   hour,
   minute,
 }
+
+enum QuizType { singleChoice, multipleChoice, qa }
+
+enum DifficultyLevel { easy, normal, hard }

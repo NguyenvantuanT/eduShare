@@ -185,7 +185,10 @@ class EditCoursePage extends StackedView<EditCourseVM> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              )
+                              ),
+                              GestureDetector(
+                                onTap: () => viewModel.createQuiz(context,quiz : quiz),
+                                child: const Icon(Icons.edit , color: AppColor.blue))
                             ],
                           );
                         },
