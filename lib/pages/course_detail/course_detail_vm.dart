@@ -6,7 +6,7 @@ import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/models/user_model.dart';
-import 'package:chat_app/pages/create_todo/create_todo_page.dart';
+import 'package:chat_app/pages/create_remind/create_remind_page.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/services/remote/comment_services.dart';
@@ -159,7 +159,7 @@ class CourseDetailVM extends BaseViewModel {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CreateTodoPage(title: course.name),
+          builder: (context) => CreateRemindPage(title: course.name),
         ));
   }
 }

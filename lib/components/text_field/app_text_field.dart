@@ -15,7 +15,10 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.readOnly = false,
     this.labelText,
-    this.onChanged, this.onTap,  this.hintTextColor  =  AppColor.grey,
+    this.onChanged,
+    this.onTap,
+    this.hintTextColor = AppColor.grey,
+    this.maxLines,
   });
 
   final TextEditingController? controller;
@@ -31,6 +34,7 @@ class AppTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final Function()? onTap;
   final Color hintTextColor;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,8 @@ class AppTextField extends StatelessWidget {
       controller: controller,
       focusNode: focusNode,
       onChanged: onChanged,
-      onTap:onTap,
+      onTap: onTap,
+      maxLines: maxLines,
       cursorColor: AppColor.textColor,
       keyboardType: keyboardType,
       onFieldSubmitted: onFieldSubmitted,
@@ -60,7 +65,7 @@ class AppTextField extends StatelessWidget {
         focusedBorder: outlineInputBorder(AppColor.grey),
         enabledBorder: outlineInputBorder(AppColor.grey),
         hintText: hintText,
-        hintStyle: AppStyles.STYLE_14.copyWith(color:hintTextColor),
+        hintStyle: AppStyles.STYLE_14.copyWith(color: hintTextColor),
         labelText: labelText,
         labelStyle: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
         prefixIcon: prefixIcon,

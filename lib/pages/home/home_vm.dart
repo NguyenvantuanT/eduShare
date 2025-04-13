@@ -1,5 +1,5 @@
 import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/models/todo_model.dart';
+import 'package:chat_app/models/remind_model.dart';
 import 'package:chat_app/services/remote/course_services.dart';
 import 'package:chat_app/services/remote/todo_services.dart';
 import 'package:chat_app/utils/enum.dart';
@@ -12,7 +12,7 @@ class HomeVM extends BaseViewModel {
   ScrollController scrollController = ScrollController();
   FocusNode messFocus = FocusNode();
   CourseServices courseServices = CourseServices();
-  TodoServices todoServices = TodoServices();
+  RemindServices todoServices = RemindServices();
   List<CourseModel> coursesLearning = [];
   List<CourseModel> coursesMoblie = [];
   List<CourseModel> coursesWeb = [];
@@ -20,7 +20,7 @@ class HomeVM extends BaseViewModel {
   List<CourseModel> coursesData = [];
   List<CourseModel> coursesDesign = [];
   List<CourseModel> coursesLanguage = [];
-  List<TodoModel> todos = [];
+  List<RemindModel> todos = [];
   int selectIndex = 0;
   bool isLoading = false;
 

@@ -12,6 +12,7 @@ import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/utils/enum.dart';
+import 'package:chat_app/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:readmore/readmore.dart';
@@ -224,7 +225,7 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
                         onChanged: viewModel.selectDifficulty,
                         itemBuilder: (value) {
                           return Text(
-                            value.name,
+                            value.displayName,
                             style: AppStyles.STYLE_14.copyWith(
                               color: value == DifficultyLevel.easy
                                   ? AppColor.green
@@ -304,7 +305,7 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
           children: [
             Expanded(
               child: Text(
-                "${viewModel.selectedDifficulty?.name} Quizzes",
+                "${viewModel.selectedDifficulty?.displayName} Quizzes",
                 style: AppStyles.STYLE_14.copyWith(
                   color: viewModel.selectedDifficulty == DifficultyLevel.easy
                       ? AppColor.green
@@ -411,8 +412,3 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
   }
 }
 
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
-  }
-}

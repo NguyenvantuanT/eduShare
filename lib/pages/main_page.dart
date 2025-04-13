@@ -5,7 +5,7 @@ import 'package:chat_app/pages/home/home_page.dart';
 import 'package:chat_app/pages/learning/learning_page.dart';
 import 'package:chat_app/pages/main_vm.dart';
 import 'package:chat_app/pages/profile/profile_page.dart';
-import 'package:chat_app/pages/todo/todo_page.dart';
+import 'package:chat_app/pages/remind/remind_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/services/local/shared_prefs.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
@@ -20,7 +20,7 @@ class MainPage extends StackedView<MainVM> {
 
   static const pages = [
     HomePage(),
-    TodoPage(),
+    RemindPage(),
     LearningPage(),
     FavoritePage(),
     CoursePage(),
