@@ -1,4 +1,4 @@
-import 'package:chat_app/models/todo_model.dart';
+import 'package:chat_app/models/remind_model.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class TodoItem extends StatelessWidget {
     this.onTap,
   });
 
-  final TodoModel todoModel;
+  final RemindModel todoModel;
   final Function()? onTap;
 
   @override

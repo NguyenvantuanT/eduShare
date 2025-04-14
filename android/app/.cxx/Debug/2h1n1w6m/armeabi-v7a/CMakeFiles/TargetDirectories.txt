@@ -1,0 +1,2 @@
+E:/flutter/Do an to nghiep/eduShare/android/app/.cxx/Debug/2h1n1w6m/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/flutter/Do an to nghiep/eduShare/android/app/.cxx/Debug/2h1n1w6m/armeabi-v7a/CMakeFiles/rebuild_cache.dir
