@@ -27,7 +27,7 @@ class AppImages {
   static const iconClosed= '${assetsIcon}ic_closed.svg';
   static const iconFavorite= '${assetsIcon}ic_favorite.svg';
   static const iconBook= '${assetsIcon}ic_book.svg';
-  static const iconTodo= '${assetsIcon}ic_todo.svg';
+  static const iconRemind= '${assetsIcon}ic_todo.svg';
   static const iconFile= '${assetsIcon}ic_file.svg';
   static const icArrowRightBig= '${assetsIcon}ic_arrow_right_big.svg';
   static const icArrowDown= '${assetsIcon}ic_arrow_down.svg';
