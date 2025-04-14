@@ -1,7 +1,7 @@
 import 'package:chat_app/components/app_search_box.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/models/todo_model.dart';
+import 'package:chat_app/models/remind_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/pages/home/home_vm.dart';
 import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
@@ -74,7 +74,7 @@ class HomePage extends StackedView<HomeVM> {
                                           horizontal: 16.0)
                                       .copyWith(bottom: 20.0),
                                   child: TodoItem(
-                                    TodoModel()
+                                    RemindModel()
                                       ..color = 0
                                       ..title = "Make your Todo"
                                       ..note = "Tap to create",

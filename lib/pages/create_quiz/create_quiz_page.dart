@@ -7,6 +7,7 @@ import 'package:chat_app/pages/create_quiz/create_quiz_vm.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/utils/enum.dart';
+import 'package:chat_app/utils/extension.dart';
 import 'package:chat_app/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -59,7 +60,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               onChanged: viewModel.choiceDifficulty,
               itemBuilder: (value) {
                 return Text(
-                  value.name,
+                  value.displayName,
                   style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
                 );
               },
@@ -77,7 +78,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               onChanged: viewModel.choiceQuizType,
               itemBuilder: (value) {
                 return Text(
-                  value.name,
+                  value.displayName,
                   style: AppStyles.STYLE_14.copyWith(color: AppColor.textColor),
                 );
               },
@@ -92,7 +93,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
                       .copyWith(color: AppColor.textColor),
                 ),
                 IconButton(
-                  onPressed: () => _showSuggestionsModal(context,viewModel),
+                  onPressed: () => _showSuggestionsModal(context, viewModel),
                   icon: const Icon(
                     Icons.lightbulb_outline,
                     color: AppColor.blue,
@@ -104,6 +105,7 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
             ),
             const SizedBox(height: 10.0),
             AppTextField(
+              maxLines: 4,
               controller: viewModel.questionController,
               labelText: "Write question?",
               textInputAction: TextInputAction.next,
@@ -146,7 +148,8 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Suggested Questions',
-                style: AppStyles.STYLE_16_BOLD.copyWith(color: AppColor.textColor),
+                style:
+                    AppStyles.STYLE_16_BOLD.copyWith(color: AppColor.textColor),
               ),
             ),
             Expanded(
@@ -211,7 +214,6 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
       },
     );
   }
-  
 
   Widget _buildWidgetQuizType(CreateQuizVM viewModel) {
     switch (viewModel.selectedType) {
@@ -254,6 +256,8 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               Radio<int>(
                 value: index,
                 groupValue: viewModel.correctOptionIndex,
+                  fillColor: MaterialStateProperty.resolveWith<Color>(
+                    (_) => AppColor.blue),
                 onChanged: (value) {
                   viewModel.correctOptionIndex = value;
                   viewModel.rebuildUi();
@@ -283,6 +287,8 @@ class CreateQuizPage extends StackedView<CreateQuizVM> {
               const SizedBox(width: 10),
               Checkbox(
                 value: viewModel.correctOptionIndices.contains(index),
+                fillColor: MaterialStateProperty.resolveWith<Color>(
+                    (_) => AppColor.blue),
                 onChanged: (checked) {
                   if (checked == true) {
                     viewModel.correctOptionIndices.add(index);
