@@ -5,7 +5,6 @@ import 'package:chat_app/models/course_model.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/models/quiz_model.dart';
 import 'package:chat_app/pages/create_lesson/create_lesson_page.dart';
-import 'package:chat_app/pages/create_quiz/create_quiz_page.dart';
 import 'package:chat_app/pages/edit_lesson/edit_lesson_page.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/services/remote/course_services.dart';
@@ -100,17 +99,7 @@ class EditCourseVM extends BaseViewModel {
     );
   }
 
-  void createQuiz(BuildContext context, {QuizModel? quiz}) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CreateQuizPage(
-          courseId: docId,
-          onUpdate: getQuizs,
-          quiz: quiz,
-        ),
-      ),
-    );
-  }
+  
 
   void editLesson(BuildContext context, LessonModel value) {
     Navigator.of(context).push(

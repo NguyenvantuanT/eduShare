@@ -1,7 +1,5 @@
-import 'package:chat_app/components/app_bar/app_tab_bar.dart';
 import 'package:chat_app/components/app_search_box.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
-import 'package:chat_app/pages/profile/profile_page.dart';
 import 'package:chat_app/pages/search/search_vm.dart';
 import 'package:chat_app/pages/search/widgets/create_course_item.dart';
 import 'package:chat_app/resource/img/app_images.dart';
@@ -28,13 +26,6 @@ class SearchPage extends StackedView<SearchVM> {
   Widget builder(BuildContext context, SearchVM viewModel, Widget? child) {
     return Scaffold(
       backgroundColor: AppColor.bgColor,
-      appBar: AppTabBar(
-        rightPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
-        ),
-        title: 'What do you want to learn today?',
-        avatar: SharedPrefs.user?.avatar ?? '',
-      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
@@ -93,4 +84,3 @@ class SearchPage extends StackedView<SearchVM> {
     );
   }
 }
-

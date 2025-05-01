@@ -1,20 +1,16 @@
 import 'package:chat_app/components/app_search_box.dart';
 import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/models/course_model.dart';
-import 'package:chat_app/models/remind_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_page.dart';
 import 'package:chat_app/pages/home/home_vm.dart';
 import 'package:chat_app/pages/home/widgets/lear_course_card.dart';
 import 'package:chat_app/pages/home/widgets/course_card.dart';
-import 'package:chat_app/pages/home/widgets/todo_item.dart';
 import 'package:chat_app/pages/main_page.dart';
-import 'package:chat_app/pages/search/search_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/utils/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stacked/stacked.dart';
 
@@ -52,62 +48,10 @@ class HomePage extends StackedView<HomeVM> {
                             readOnly: true,
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => const SearchPage(),
+                                builder: (context) => const MainPage(index: 1),
                               ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(left: 16.0, bottom: 10.0),
-                          child: Text(
-                            'Todo Task',
-                            style: AppStyles.STYLE_14_BOLD
-                                .copyWith(color: AppColor.textColor),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 120.0,
-                          child: viewModel.todos.isEmpty
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0)
-                                      .copyWith(bottom: 20.0),
-                                  child: TodoItem(
-                                    RemindModel()
-                                      ..color = 0
-                                      ..title = "Make your Todo"
-                                      ..note = "Tap to create",
-                                    onTap: () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const MainPage(index: 1))),
-                                  ),
-                                )
-                              : ListView.separated(
-                                  itemCount: viewModel.todos.length,
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0)
-                                      .copyWith(bottom: 20.0),
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(width: 8.0),
-                                  itemBuilder: (context, idx) {
-                                    final todo = viewModel.todos[idx];
-                                    return AnimationConfiguration.staggeredList(
-                                      position: idx,
-                                      child: SlideAnimation(
-                                        duration:
-                                            const Duration(milliseconds: 500),
-                                        horizontalOffset: 200.0,
-                                        child: FadeInAnimation(
-                                            child: TodoItem(
-                                          todo,
-                                        )),
-                                      ),
-                                    );
-                                  },
-                                ),
                         ),
                         Padding(
                           padding:

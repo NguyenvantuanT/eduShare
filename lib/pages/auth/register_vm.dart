@@ -39,7 +39,7 @@ class RegisterVM extends BaseViewModel {
     RegisterBody body = RegisterBody()
       ..name = usernameController.text.trim()
       ..email = emailController.text.trim()
-      ..password = passwordController.text
+      ..password = passwordController.text.trim()
       ..avatar = fileAvatar != null
           ? await postImageServices.post(image: fileAvatar!)
           : null;

@@ -1,18 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/components/app_drop_down.dart';
-import 'package:chat_app/components/app_shadow.dart';
 import 'package:chat_app/components/mv_simmer.dart';
 import 'package:chat_app/models/lesson_model.dart';
 import 'package:chat_app/pages/course_detail/course_detail_vm.dart';
-import 'package:chat_app/pages/course_detail/widgets/comment_card.dart';
 import 'package:chat_app/pages/course_detail/widgets/course_button.dart';
 import 'package:chat_app/pages/lesson/lesson_page.dart';
-import 'package:chat_app/pages/quiz/quiz_page.dart';
 import 'package:chat_app/resource/img/app_images.dart';
 import 'package:chat_app/resource/themes/app_colors.dart';
 import 'package:chat_app/resource/themes/app_style.dart';
-import 'package:chat_app/utils/enum.dart';
-import 'package:chat_app/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:readmore/readmore.dart';
@@ -157,11 +151,6 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
                             ),
                     ),
                     const Spacer(),
-                    CourseButton(
-                      text: "Add to Remind",
-                      onTap: () => viewModel.addCourseTodo(context),
-                      icon: AppImages.iconRemind,
-                    ),
                   ],
                 ),
                 const SizedBox(height: 20.0),
@@ -201,71 +190,7 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
                         idx: idx, lesson: lesson, viewModel: viewModel);
                   },
                 ),
-                const Divider(color: AppColor.blue),
-                const SizedBox(height: 15.0),
-                Text(
-                  'Quizzes',
-                  style: AppStyles.STYLE_16_BOLD
-                      .copyWith(color: AppColor.textColor),
-                ),
-                const SizedBox(height: 10.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Select Difficulty:',
-                      style: AppStyles.STYLE_14_BOLD
-                          .copyWith(color: AppColor.textColor),
-                    ),
-                    SizedBox(
-                      width: 120.0,
-                      child: AppDropDown<DifficultyLevel>(
-                        items: DifficultyLevel.values,
-                        selectedItem: viewModel.selectedDifficulty,
-                        onChanged: viewModel.selectDifficulty,
-                        itemBuilder: (value) {
-                          return Text(
-                            value.displayName,
-                            style: AppStyles.STYLE_14.copyWith(
-                              color: value == DifficultyLevel.easy
-                                  ? AppColor.green
-                                  : value == DifficultyLevel.normal
-                                      ? AppColor.blue
-                                      : AppColor.red,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10.0),
-                _buildQuizSection(context, viewModel),
-                const SizedBox(height: 25.0),
-                Text(
-                  'Comment',
-                  style: AppStyles.STYLE_16_BOLD
-                      .copyWith(color: AppColor.textColor),
-                ),
-                const SizedBox(height: 15.0),
-                _buildTextFieldDes(viewModel),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(top: 20.0, bottom: 50.0),
-                  itemCount: viewModel.comments.length,
-                  separatorBuilder: (_, __) =>
-                      Divider(color: AppColor.greyText.withOpacity(0.5)),
-                  itemBuilder: (context, idx) {
-                    final comment = viewModel.comments[idx];
-                    return CommentCard(
-                      comment,
-                      onRatingUpdate: (rating) {
-                        viewModel.updateRating(comment, rating);
-                      },
-                    );
-                  },
-                ),
+                
               ],
             ),
           ),
@@ -274,84 +199,7 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
     );
   }
 
-  Widget _buildQuizSection(BuildContext context, CourseDetailVM viewModel) {
-    if (viewModel.selectedDifficulty == null) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.0),
-        child: Text(
-          "Please select a difficulty level",
-          style: AppStyles.STYLE_14,
-        ),
-      );
-    }
-
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => QuizPage(
-            docId,
-            level: viewModel.selectedDifficulty,
-          ),
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-        margin: const EdgeInsets.symmetric(vertical: 10.0),
-        decoration: BoxDecoration(
-            color: AppColor.white,
-            borderRadius: BorderRadius.circular(15.0),
-            boxShadow: AppShadow.boxShadowContainer),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                "${viewModel.selectedDifficulty?.displayName} Quizzes",
-                style: AppStyles.STYLE_14.copyWith(
-                  color: viewModel.selectedDifficulty == DifficultyLevel.easy
-                      ? AppColor.green
-                      : viewModel.selectedDifficulty == DifficultyLevel.normal
-                          ? AppColor.blue
-                          : AppColor.red,
-                ),
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16.0,
-              color: AppColor.blue,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  TextField _buildTextFieldDes(CourseDetailVM viewModel) {
-    OutlineInputBorder outlineInputBorder(Color color) => OutlineInputBorder(
-          borderSide: BorderSide(color: color, width: 1.2),
-          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-        );
-    return TextField(
-      maxLines: 2,
-      controller: viewModel.commentController,
-      decoration: InputDecoration(
-        border: outlineInputBorder(AppColor.grey),
-        focusedBorder: outlineInputBorder(AppColor.grey),
-        hintText: 'Your comment..',
-        suffixIcon: InkWell(
-          onTap: viewModel.createComment,
-          child: const Icon(
-            Icons.send,
-            color: AppColor.blue,
-            size: 18.0,
-          ),
-        ),
-        hintStyle: AppStyles.STYLE_14.copyWith(
-          color: AppColor.textColor,
-        ),
-      ),
-    );
-  }
+ 
 
   Widget _buildLessonCard(
     BuildContext context, {
@@ -411,4 +259,3 @@ class CourseDetailPage extends StackedView<CourseDetailVM> {
     );
   }
 }
-

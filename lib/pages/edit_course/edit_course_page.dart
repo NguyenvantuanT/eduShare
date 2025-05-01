@@ -83,7 +83,7 @@ class EditCoursePage extends StackedView<EditCourseVM> {
                       const Divider(color: AppColor.blue),
                       const SizedBox(height: 10.0),
                       GestureDetector(
-                        onTap:() => viewModel.createLesson(context),
+                        onTap: () => viewModel.createLesson(context),
                         behavior: HitTestBehavior.translucent,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +126,8 @@ class EditCoursePage extends StackedView<EditCourseVM> {
                               Expanded(
                                 child: LessonCard(
                                   lesson,
-                                  onEdit: () => viewModel.editLesson(context,lesson),
+                                  onEdit: () =>
+                                      viewModel.editLesson(context, lesson),
                                   onDelete: () => viewModel.deleteLesson(
                                       context, lesson.lessonId ?? ""),
                                 ),
@@ -138,61 +139,6 @@ class EditCoursePage extends StackedView<EditCourseVM> {
                       const SizedBox(height: 20.0),
                       const Divider(color: AppColor.blue),
                       const SizedBox(height: 10.0),
-                      GestureDetector(
-                        onTap:() => viewModel.createQuiz(context),
-                        behavior: HitTestBehavior.translucent,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Add Quiz?',
-                              style: AppStyles.STYLE_14_BOLD
-                                  .copyWith(color: AppColor.textColor),
-                            ),
-                            Text(
-                              'Tap to create Quiz',
-                              style: AppStyles.STYLE_14
-                                  .copyWith(color: AppColor.greyText),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      ListView.separated(
-                        itemCount: viewModel.quizs.length,
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        separatorBuilder: (_, __) => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Divider(color: AppColor.grey, height: 1.0),
-                        ),
-                        itemBuilder: (context, index) {
-                          final quiz = viewModel.quizs[index];
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Quiz ${index + 1}:",
-                                style: AppStyles.STYLE_14_BOLD.copyWith(
-                                  color: AppColor.textColor,
-                                ),
-                              ),
-                              const SizedBox(width: 10.0),
-                              Expanded(
-                                child: Text(
-                                  quiz.question ?? '',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => viewModel.createQuiz(context,quiz : quiz),
-                                child: const Icon(Icons.edit , color: AppColor.blue))
-                            ],
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -210,6 +156,7 @@ class EditCoursePage extends StackedView<EditCourseVM> {
             ),
     );
   }
+
   Widget _buildSelectImage(EditCourseVM viewModel) {
     const radius = 30.0;
     return Column(
@@ -231,8 +178,9 @@ class EditCoursePage extends StackedView<EditCourseVM> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             fit: BoxFit.cover,
-                            image: FileImage(File(viewModel.imgCourse?.path ?? ''))
-                                as ImageProvider,
+                            image:
+                                FileImage(File(viewModel.imgCourse?.path ?? ''))
+                                    as ImageProvider,
                           ),
                         ))
                     : CachedNetworkImage(
@@ -303,6 +251,4 @@ class EditCoursePage extends StackedView<EditCourseVM> {
           )),
     );
   }
-  
 }
-

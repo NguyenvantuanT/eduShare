@@ -24,28 +24,29 @@ class ChangePasswordVM extends BaseViewModel {
       ..currentPassword = currentPasswordController.text.trim()
       ..newPassword = newPasswordController.text.trim();
 
-    authServices.changePassword(body).then((value) {
+    authServices.changePassword(body).then((_) {
       if (!context.mounted) return;
-      if (value) {
-        DelightToastShow.showToast(
-          context: context,
-          text: "Change Success !",
-          icon: Icons.check,
-        );
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => LoginPage(email: body.email)),
-            (Route<dynamic> route) => false);
-      } else {
-        isLoading = false;
-        rebuildUi();
-        DelightToastShow.showToast(
-          context: context,
-          text: 'Current password is wrong😐',
-          icon: Icons.check,
-        );
-      }
-    }).catchError((_) {});
+      DelightToastShow.showToast(
+        context: context,
+        text: "Change Success !",
+        icon: Icons.check,
+      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginPage(email: body.email),
+          ),
+          (Route<dynamic> route) => false);
+    }).catchError((_) {
+      if (!context.mounted) return;
+      DelightToastShow.showToast(
+        context: context,
+        text: 'Current password is wrong😐',
+        icon: Icons.check,
+      );
+    }).whenComplete(() {
+      isLoading = false;
+      rebuildUi();
+    });
   }
 }
